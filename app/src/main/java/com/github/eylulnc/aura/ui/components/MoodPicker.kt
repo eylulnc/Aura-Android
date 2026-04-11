@@ -11,11 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import com.github.eylulnc.aura.constants.MOODS
-import com.github.eylulnc.aura.ui.theme.auraColors
+import com.github.eylulnc.aura.ui.theme.*
 
 @Composable
 fun MoodPicker(
@@ -25,7 +23,7 @@ fun MoodPicker(
 ) {
     val colors = auraColors
 
-    Column(modifier = modifier.padding(vertical = 8.dp)) {
+    Column(modifier = modifier.padding(vertical = Spacing.s)) {
         MOODS.chunked(4).forEach { row ->
             Row(modifier = Modifier.fillMaxWidth()) {
                 row.forEach { mood ->
@@ -36,29 +34,33 @@ fun MoodPicker(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .weight(1f)
-                            .padding(6.dp)
+                            .padding(Spacing.s / 2)
                             .clickable { onSelect(mood.id) }
                     ) {
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
-                                .size(56.dp)
+                                .size(Spacing.moodFaceWrapperSize)
                                 .then(
-                                    if (isSelected) Modifier.border(2.dp, moodColor, CircleShape)
+                                    if (isSelected) Modifier.border(
+                                        Spacing.selectionBorderWidth,
+                                        moodColor,
+                                        CircleShape
+                                    )
                                     else Modifier
                                 )
                         ) {
                             MoodSvgImage(
                                 moodFace = mood,
-                                modifier = Modifier.size(52.dp)
+                                modifier = Modifier.size(Spacing.moodFaceSize)
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(Spacing.xs))
 
                         Text(
                             text = mood.label,
-                            fontSize = 11.sp,
+                            fontSize = FontSize.xs,
                             fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
                             color = if (isSelected) moodColor else colors.textSecondary,
                             maxLines = 1,

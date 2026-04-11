@@ -70,7 +70,6 @@ fun AuraTheme(
     CompositionLocalProvider(LocalAuraColors provides auraColors) {
         MaterialTheme(
             colorScheme = m3Scheme,
-            typography = Typography,
             content = content
         )
     }

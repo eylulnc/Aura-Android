@@ -13,19 +13,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColorInt
+import com.github.eylulnc.aura.R
 import com.github.eylulnc.aura.constants.getMoodFace
 import com.github.eylulnc.aura.ui.components.MoodPicker
 import com.github.eylulnc.aura.ui.components.MoodSvgImage
-import com.github.eylulnc.aura.ui.theme.auraColors
+import com.github.eylulnc.aura.ui.theme.*
 import com.github.eylulnc.aura.viewmodel.TodayViewModel
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import androidx.core.graphics.toColorInt
 
 @Composable
 fun TodayScreen(
@@ -40,17 +40,16 @@ fun TodayScreen(
             .fillMaxSize()
             .background(colors.background)
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp)
-            .padding(top = 16.dp, bottom = 16.dp)
+            .padding(horizontal = Spacing.l)
+            .padding(top = Spacing.l, bottom = Spacing.l)
     ) {
-
         Text(
             text = formattedDate(),
-            fontSize = 16.sp,
+            fontSize = FontSize.m,
             color = colors.textSecondary
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.l))
 
         if (showPicker) {
             PickerContent(
@@ -74,20 +73,20 @@ fun TodayScreen(
 @Composable
 private fun PickerContent(
     state: com.github.eylulnc.aura.viewmodel.TodayUiState,
-    colors: com.github.eylulnc.aura.ui.theme.AuraColors,
+    colors: AuraColors,
     onSelect: (Int) -> Unit,
     onNoteChange: (String) -> Unit,
     onConfirm: () -> Unit,
     onCancel: () -> Unit
 ) {
     Text(
-        text = "How are you feeling?",
-        fontSize = 24.sp,
+        text = stringResource(R.string.today_prompt_empty),
+        fontSize = FontSize.xl,
         fontWeight = FontWeight.SemiBold,
         color = colors.textPrimary
     )
 
-    Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(Spacing.l))
 
     MoodPicker(
         selected = state.pendingMoodId,
@@ -95,19 +94,18 @@ private fun PickerContent(
         modifier = Modifier.fillMaxWidth()
     )
 
-    Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(Spacing.l))
 
-    // Note input
     OutlinedTextField(
         value = state.note,
         onValueChange = onNoteChange,
         placeholder = {
-            Text("Add a note… (optional)", color = colors.textSecondary)
+            Text(stringResource(R.string.today_note_placeholder), color = colors.textSecondary)
         },
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 80.dp),
-        shape = RoundedCornerShape(12.dp),
+            .heightIn(min = Spacing.noteInputMinHeight),
+        shape = RoundedCornerShape(Spacing.radiusCard),
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = colors.accent,
             unfocusedBorderColor = colors.border,
@@ -118,17 +116,17 @@ private fun PickerContent(
         maxLines = 5
     )
 
-    Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(Spacing.l))
 
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
         if (state.isEditing) {
             OutlinedButton(
                 onClick = onCancel,
                 modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(Spacing.radiusButton),
                 border = ButtonDefaults.outlinedButtonBorder(enabled = true)
             ) {
-                Text("Cancel", color = colors.textSecondary)
+                Text(stringResource(R.string.today_action_cancel), color = colors.textSecondary)
             }
         }
 
@@ -137,25 +135,26 @@ private fun PickerContent(
             onClick = onConfirm,
             enabled = confirmed,
             modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(Spacing.radiusButton),
             colors = ButtonDefaults.buttonColors(
                 containerColor = colors.accent,
                 disabledContainerColor = colors.surfaceSubtle
             )
         ) {
             Text(
-                text = if (state.isEditing) "Update" else "Log mood",
+                text = stringResource(
+                    if (state.isEditing) R.string.today_action_update else R.string.today_action_log
+                ),
                 color = if (confirmed) Color.White else colors.textSecondary
             )
         }
     }
 }
 
-
 @Composable
 private fun LoggedContent(
     state: com.github.eylulnc.aura.viewmodel.TodayUiState,
-    colors: com.github.eylulnc.aura.ui.theme.AuraColors,
+    colors: AuraColors,
     onEdit: () -> Unit
 ) {
     val entry = state.todayEntry ?: return
@@ -163,13 +162,13 @@ private fun LoggedContent(
     val moodColor = Color(face.color.toColorInt())
 
     Text(
-        text = "You're feeling",
-        fontSize = 22.sp,
+        text = stringResource(R.string.today_prompt_logged),
+        fontSize = FontSize.l,
         fontWeight = FontWeight.SemiBold,
         color = colors.textPrimary
     )
 
-    Spacer(modifier = Modifier.height(32.dp))
+    Spacer(modifier = Modifier.height(Spacing.xxl))
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -177,58 +176,58 @@ private fun LoggedContent(
     ) {
         MoodSvgImage(
             moodFace = face,
-            modifier = Modifier.size(96.dp)
+            modifier = Modifier.size(Spacing.moodFaceLargeSize)
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.m))
 
         Text(
             text = face.label,
-            fontSize = 24.sp,
+            fontSize = FontSize.xl,
             fontWeight = FontWeight.Bold,
             color = moodColor
         )
 
         Text(
             text = face.sub,
-            fontSize = 14.sp,
+            fontSize = FontSize.s,
             color = colors.textSecondary
         )
     }
 
     if (!entry.note.isNullOrBlank()) {
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Spacing.xl))
 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, colors.border, RoundedCornerShape(12.dp))
-                .background(colors.surface, RoundedCornerShape(12.dp))
-                .padding(16.dp)
+                .border(Spacing.borderWidth, colors.border, RoundedCornerShape(Spacing.radiusCard))
+                .background(colors.surface, RoundedCornerShape(Spacing.radiusCard))
+                .padding(Spacing.l)
         ) {
             Text(
-                text = "Your note",
-                fontSize = 11.sp,
+                text = stringResource(R.string.today_note_label),
+                fontSize = FontSize.xs,
                 color = colors.textSecondary
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
             Text(
                 text = entry.note,
-                fontSize = 15.sp,
+                fontSize = FontSize.m,
                 color = colors.textPrimary
             )
         }
     }
 
-    Spacer(modifier = Modifier.height(24.dp))
+    Spacer(modifier = Modifier.height(Spacing.xl))
 
     OutlinedButton(
         onClick = onEdit,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(Spacing.radiusButton),
         border = ButtonDefaults.outlinedButtonBorder(enabled = true)
     ) {
-        Text("Edit", color = colors.textSecondary)
+        Text(stringResource(R.string.today_action_edit), color = colors.textSecondary)
     }
 }
 
@@ -236,4 +235,3 @@ private fun formattedDate(): String =
     LocalDate.now().format(
         DateTimeFormatter.ofPattern("EEEE, MMMM d", Locale.getDefault())
     )
-

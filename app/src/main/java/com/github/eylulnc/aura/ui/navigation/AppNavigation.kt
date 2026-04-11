@@ -8,7 +8,9 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -16,15 +18,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.github.eylulnc.aura.R
 import com.github.eylulnc.aura.ui.history.HistoryScreen
 import com.github.eylulnc.aura.ui.settings.SettingsScreen
 import com.github.eylulnc.aura.ui.theme.auraColors
 import com.github.eylulnc.aura.ui.today.TodayScreen
 
-sealed class Screen(val route: String, val label: String, val icon: ImageVector) {
-    data object Today : Screen("today", "Today", Icons.Default.Home)
-    data object History : Screen("history", "History", Icons.Default.DateRange)
-    data object Settings : Screen("settings", "Settings", Icons.Default.Settings)
+sealed class Screen(val route: String, val labelRes: Int, val icon: ImageVector) {
+    data object Today : Screen("today", R.string.tab_today, Icons.Default.Home)
+    data object History : Screen("history", R.string.tab_history, Icons.Default.DateRange)
+    data object Settings : Screen("settings", R.string.tab_settings, Icons.Default.Settings)
 }
 
 private val tabs = listOf(Screen.Today, Screen.History, Screen.Settings)
@@ -62,10 +65,10 @@ fun AppNavigation() {
                         icon = {
                             Icon(
                                 imageVector = screen.icon,
-                                contentDescription = screen.label
+                                contentDescription = stringResource(screen.labelRes)
                             )
                         },
-                        label = { Text(screen.label) },
+                        label = { Text(stringResource(screen.labelRes)) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = colors.accent,
                             selectedTextColor = colors.accent,
@@ -81,7 +84,7 @@ fun AppNavigation() {
         NavHost(
             navController = navController,
             startDestination = Screen.Today.route,
-            modifier = androidx.compose.ui.Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Today.route) { TodayScreen() }
             composable(Screen.History.route) { HistoryScreen() }

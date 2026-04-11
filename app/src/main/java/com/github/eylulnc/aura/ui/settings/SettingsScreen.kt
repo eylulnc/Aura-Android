@@ -6,8 +6,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.sp
-import com.github.eylulnc.aura.ui.theme.auraColors
+import androidx.compose.ui.res.stringResource
+import com.github.eylulnc.aura.R
+import com.github.eylulnc.aura.ui.theme.*
 
 @Composable
 fun SettingsScreen() {
@@ -18,6 +19,10 @@ fun SettingsScreen() {
             .fillMaxSize()
             .background(colors.background)
     ) {
-        Text("Settings — coming soon", fontSize = 16.sp, color = colors.textSecondary)
+        Text(
+            text = stringResource(R.string.settings_coming_soon),
+            fontSize = FontSize.m,
+            color = colors.textSecondary
+        )
     }
 }
