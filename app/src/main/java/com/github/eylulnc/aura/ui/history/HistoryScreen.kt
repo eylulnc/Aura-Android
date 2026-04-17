@@ -6,12 +6,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -51,15 +51,22 @@ fun HistoryScreen(viewModel: HistoryViewModel = koinViewModel()) {
             containerColor = colors.surface,
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         ) {
-            EntryEditSheet(
-                state = state,
-                colors = colors,
-                onSelectMood = viewModel::selectMood,
-                onNoteChange = viewModel::setNote,
-                onUpdate = viewModel::updateEntry,
-                onDelete = viewModel::deleteEntry,
-                onCancel = viewModel::closeSheet
-            )
+            if (state.isEditMode) {
+                EntryEditSheet(
+                    state = state,
+                    colors = colors,
+                    onSelectMood = viewModel::selectMood,
+                    onNoteChange = viewModel::setNote,
+                    onUpdate = viewModel::updateEntry,
+                    onDelete = viewModel::deleteEntry,
+                    onCancel = viewModel::closeSheet
+                )
+            } else {
+                EntryViewSheet(
+                    entry = state.sheetEntry!!,
+                    colors = colors
+                )
+            }
         }
     }
 
@@ -81,8 +88,9 @@ fun HistoryScreen(viewModel: HistoryViewModel = koinViewModel()) {
             CalendarGrid(
                 month = state.selectedMonth,
                 entryByDay = state.entryByDay,
+                selectedDay = state.selectedDay,
                 colors = colors,
-                onDayClick = viewModel::openSheet
+                onDayClick = viewModel::selectDay
             )
             Spacer(Modifier.height(Spacing.l))
             HorizontalDivider(color = colors.border)
@@ -105,8 +113,13 @@ fun HistoryScreen(viewModel: HistoryViewModel = koinViewModel()) {
                 }
             }
         } else {
+            val todayStr = LocalDate.now().toString()
             items(state.monthEntries, key = { it.id }) { entry ->
-                EntryRow(entry = entry, colors = colors, onClick = { viewModel.openSheet(entry) })
+                EntryRow(
+                    entry = entry,
+                    colors = colors,
+                    onEdit = if (entry.date == todayStr) ({ viewModel.openSheet(entry) }) else null
+                )
                 Spacer(Modifier.height(Spacing.s))
             }
         }
@@ -155,18 +168,18 @@ private fun MonthHeader(
 private fun CalendarGrid(
     month: YearMonth,
     entryByDay: Map<Int, MoodEntry>,
+    selectedDay: Int?,
     colors: AuraColors,
-    onDayClick: (MoodEntry) -> Unit
+    onDayClick: (Int) -> Unit
 ) {
     val today = LocalDate.now()
     val isCurrentMonth = month.year == today.year && month.monthValue == today.monthValue
-    val firstDayOffset = month.atDay(1).dayOfWeek.value - 1 // 0-based Monday offset
+    val firstDayOffset = month.atDay(1).dayOfWeek.value - 1
     val daysInMonth = month.lengthOfMonth()
     val totalCells = firstDayOffset + daysInMonth
     val rows = (totalCells + 6) / 7
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        // Day-of-week headers Mon → Sun
         Row(modifier = Modifier.fillMaxWidth()) {
             DayOfWeek.entries.forEach { dow ->
                 Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
@@ -194,12 +207,14 @@ private fun CalendarGrid(
                         if (day in 1..daysInMonth) {
                             val entry = entryByDay[day]
                             val isToday = isCurrentMonth && today.dayOfMonth == day
+                            val isSelected = selectedDay == day
                             DayCell(
                                 day = day,
                                 entry = entry,
                                 isToday = isToday,
+                                isSelected = isSelected,
                                 colors = colors,
-                                onClick = { if (entry != null) onDayClick(entry) }
+                                onClick = { if (entry != null) onDayClick(day) }
                             )
                         }
                     }
@@ -214,10 +229,16 @@ private fun DayCell(
     day: Int,
     entry: MoodEntry?,
     isToday: Boolean,
+    isSelected: Boolean,
     colors: AuraColors,
     onClick: () -> Unit
 ) {
-    val moodColor = entry?.let { Color(getMoodFace(it.mood).color.toColorInt()) }
+    val face = entry?.let { getMoodFace(it.mood) }
+    val borderColor = when {
+        isToday || isSelected -> colors.accent
+        else -> colors.border
+    }
+    val bgColor = if (isSelected) colors.accent.copy(alpha = 0.12f) else Color.Transparent
 
     Box(
         contentAlignment = Alignment.Center,
@@ -225,37 +246,33 @@ private fun DayCell(
             .fillMaxSize()
             .padding(2.dp)
             .clip(RoundedCornerShape(Spacing.radiusCard))
-            .then(
-                if (isToday) Modifier.border(
-                    Spacing.borderWidth,
-                    colors.accent,
-                    RoundedCornerShape(Spacing.radiusCard)
-                ) else Modifier
-            )
+            .background(bgColor)
+            .border(Spacing.borderWidth, borderColor, RoundedCornerShape(Spacing.radiusCard))
             .clickable(enabled = entry != null, onClick = onClick)
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        if (face != null) {
+            MoodSvgImage(
+                moodFace = face,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(4.dp)
+            )
             Text(
                 text = day.toString(),
                 fontSize = FontSize.xs,
-                color = when {
-                    isToday -> colors.accent
-                    entry != null -> colors.textPrimary
-                    else -> colors.textSecondary
-                },
+                color = if (isToday || isSelected) colors.accent else colors.textPrimary,
+                fontWeight = if (isToday || isSelected) FontWeight.Bold else FontWeight.Normal,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(start = 4.dp, top = 2.dp)
+            )
+        } else {
+            Text(
+                text = day.toString(),
+                fontSize = FontSize.xs,
+                color = if (isToday) colors.accent else colors.textSecondary,
                 fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal
             )
-            Spacer(Modifier.height(2.dp))
-            if (moodColor != null) {
-                Box(
-                    modifier = Modifier
-                        .size(5.dp)
-                        .clip(CircleShape)
-                        .background(moodColor)
-                )
-            } else {
-                Spacer(Modifier.height(5.dp))
-            }
         }
     }
 }
@@ -264,7 +281,7 @@ private fun DayCell(
 private fun EntryRow(
     entry: MoodEntry,
     colors: AuraColors,
-    onClick: () -> Unit
+    onEdit: (() -> Unit)?
 ) {
     val face = getMoodFace(entry.mood)
     val moodColor = Color(face.color.toColorInt())
@@ -277,7 +294,6 @@ private fun EntryRow(
             .fillMaxWidth()
             .clip(RoundedCornerShape(Spacing.radiusCard))
             .background(colors.surface)
-            .clickable(onClick = onClick)
             .padding(Spacing.m)
     ) {
         MoodSvgImage(
@@ -307,6 +323,60 @@ private fun EntryRow(
                     overflow = TextOverflow.Ellipsis
                 )
             }
+        }
+        if (onEdit != null) {
+            IconButton(onClick = onEdit) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = null,
+                    tint = colors.accent
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun EntryViewSheet(
+    entry: MoodEntry,
+    colors: AuraColors
+) {
+    val face = getMoodFace(entry.mood)
+    val moodColor = Color(face.color.toColorInt())
+    val dateLabel = LocalDate.parse(entry.date)
+        .format(DateTimeFormatter.ofPattern("EEEE, MMMM d", Locale.getDefault()))
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.l)
+            .padding(bottom = Spacing.xxl)
+    ) {
+        MoodSvgImage(
+            moodFace = face,
+            modifier = Modifier.size(80.dp)
+        )
+        Spacer(Modifier.height(Spacing.m))
+        Text(
+            text = face.label,
+            fontSize = FontSize.l,
+            fontWeight = FontWeight.SemiBold,
+            color = moodColor
+        )
+        Spacer(Modifier.height(Spacing.s))
+        Text(
+            text = dateLabel,
+            fontSize = FontSize.s,
+            color = colors.textSecondary
+        )
+        if (!entry.note.isNullOrBlank()) {
+            Spacer(Modifier.height(Spacing.m))
+            Text(
+                text = entry.note,
+                fontSize = FontSize.s,
+                color = colors.textPrimary
+            )
         }
     }
 }
