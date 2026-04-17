@@ -1,21 +1,29 @@
 package com.github.eylulnc.aura.ui.history
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,6 +39,7 @@ import com.github.eylulnc.aura.model.MoodEntry
 import com.github.eylulnc.aura.ui.components.MoodPicker
 import com.github.eylulnc.aura.ui.components.MoodSvgImage
 import com.github.eylulnc.aura.ui.theme.*
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -44,6 +53,9 @@ import java.util.Locale
 fun HistoryScreen(viewModel: HistoryViewModel = koinViewModel()) {
     val state by viewModel.uiState.collectAsState()
     val colors = auraColors
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    val showFab by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
 
     if (state.isSheetOpen && state.sheetEntry != null) {
         ModalBottomSheet(
@@ -70,70 +82,128 @@ fun HistoryScreen(viewModel: HistoryViewModel = koinViewModel()) {
         }
     }
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colors.background),
-        contentPadding = PaddingValues(horizontal = Spacing.l, vertical = Spacing.l)
-    ) {
-
-        item {
-            MonthHeader(
-                month = state.selectedMonth,
-                onPrev = viewModel::prevMonth,
-                onNext = viewModel::nextMonth,
-                colors = colors
-            )
-            Spacer(Modifier.height(Spacing.l))
-            CalendarGrid(
-                month = state.selectedMonth,
-                entryByDay = state.entryByDay,
-                selectedDay = state.selectedDay,
-                colors = colors,
-                onDayClick = viewModel::selectDay
-            )
-            Spacer(Modifier.height(Spacing.l))
-            HorizontalDivider(color = colors.border)
-            Spacer(Modifier.height(Spacing.l))
-        }
-
-        if (state.monthEntries.isEmpty()) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            state = listState,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(colors.background),
+            contentPadding = PaddingValues(horizontal = Spacing.l, vertical = Spacing.l)
+        ) {
             item {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = Spacing.xxl)
-                ) {
-                    Text(
-                        text = stringResource(R.string.history_no_entries),
-                        fontSize = FontSize.s,
-                        color = colors.textSecondary
+                MonthHeader(
+                    month = state.selectedMonth,
+                    earliestMonth = viewModel.firstLaunchMonth,
+                    onPrev = viewModel::prevMonth,
+                    onNext = viewModel::nextMonth,
+                    colors = colors
+                )
+                Spacer(Modifier.height(Spacing.l))
+                CalendarGrid(
+                    month = state.selectedMonth,
+                    entryByDay = state.entryByDay,
+                    selectedDay = state.selectedDay,
+                    colors = colors,
+                    onDayClick = viewModel::selectDay
+                )
+                Spacer(Modifier.height(Spacing.l))
+                HorizontalDivider(color = colors.border)
+                Spacer(Modifier.height(Spacing.s))
+                SortRow(sortOrder = state.sortOrder, onToggle = viewModel::toggleSort, colors = colors)
+                Spacer(Modifier.height(Spacing.s))
+            }
+
+            if (state.monthEntries.isEmpty()) {
+                item {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = Spacing.xxl)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.history_no_entries),
+                            fontSize = FontSize.s,
+                            color = colors.textSecondary
+                        )
+                    }
+                }
+            } else {
+                val todayStr = LocalDate.now().toString()
+                items(state.monthEntries, key = { it.id }) { entry ->
+                    EntryRow(
+                        entry = entry,
+                        colors = colors,
+                        onEdit = if (entry.date == todayStr) ({ viewModel.openSheet(entry) }) else null
                     )
+                    Spacer(Modifier.height(Spacing.s))
                 }
             }
-        } else {
-            val todayStr = LocalDate.now().toString()
-            items(state.monthEntries, key = { it.id }) { entry ->
-                EntryRow(
-                    entry = entry,
-                    colors = colors,
-                    onEdit = if (entry.date == todayStr) ({ viewModel.openSheet(entry) }) else null
-                )
-                Spacer(Modifier.height(Spacing.s))
+        }
+
+        AnimatedVisibility(
+            visible = showFab,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(Spacing.l)
+        ) {
+            SmallFloatingActionButton(
+                onClick = { scope.launch { listState.animateScrollToItem(0) } },
+                containerColor = colors.surface,
+                contentColor = colors.textPrimary
+            ) {
+                Icon(Icons.Default.KeyboardArrowUp, contentDescription = null)
             }
         }
     }
 }
 
 @Composable
+private fun SortRow(
+    sortOrder: SortOrder,
+    onToggle: () -> Unit,
+    colors: AuraColors
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.End,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        FilterChip(
+            selected = true,
+            onClick = onToggle,
+            label = {
+                Text(
+                    text = if (sortOrder == SortOrder.Newest) "Newest first" else "Oldest first",
+                    fontSize = FontSize.xs
+                )
+            },
+            colors = FilterChipDefaults.filterChipColors(
+                selectedContainerColor = colors.surface,
+                selectedLabelColor = colors.textPrimary
+            ),
+            border = FilterChipDefaults.filterChipBorder(
+                enabled = true,
+                selected = true,
+                borderColor = colors.border,
+                selectedBorderColor = colors.border
+            )
+        )
+    }
+}
+
+@Composable
 private fun MonthHeader(
     month: YearMonth,
+    earliestMonth: YearMonth,
     onPrev: () -> Unit,
     onNext: () -> Unit,
     colors: AuraColors
 ) {
     val label = month.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault()))
+    val canGoPrev = month > earliestMonth
     val canGoNext = month < YearMonth.now()
 
     Row(
@@ -141,11 +211,11 @@ private fun MonthHeader(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier.fillMaxWidth()
     ) {
-        IconButton(onClick = onPrev) {
+        IconButton(onClick = onPrev, enabled = canGoPrev) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                 contentDescription = null,
-                tint = colors.textPrimary
+                tint = if (canGoPrev) colors.textPrimary else colors.border
             )
         }
         Text(
@@ -240,8 +310,8 @@ private fun DayCell(
     }
     val bgColor = if (isSelected) colors.accent.copy(alpha = 0.12f) else Color.Transparent
 
-    Box(
-        contentAlignment = Alignment.Center,
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
             .padding(2.dp)
@@ -249,29 +319,25 @@ private fun DayCell(
             .background(bgColor)
             .border(Spacing.borderWidth, borderColor, RoundedCornerShape(Spacing.radiusCard))
             .clickable(enabled = entry != null, onClick = onClick)
+            .padding(top = 3.dp, bottom = 2.dp)
     ) {
+        Text(
+            text = day.toString(),
+            fontSize = FontSize.xs,
+            color = when {
+                isToday || isSelected -> colors.accent
+                face != null -> colors.textPrimary
+                else -> colors.textSecondary
+            },
+            fontWeight = if (isToday || isSelected) FontWeight.Bold else FontWeight.Normal
+        )
         if (face != null) {
             MoodSvgImage(
                 moodFace = face,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(4.dp)
-            )
-            Text(
-                text = day.toString(),
-                fontSize = FontSize.xs,
-                color = if (isToday || isSelected) colors.accent else colors.textPrimary,
-                fontWeight = if (isToday || isSelected) FontWeight.Bold else FontWeight.Normal,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(start = 4.dp, top = 2.dp)
-            )
-        } else {
-            Text(
-                text = day.toString(),
-                fontSize = FontSize.xs,
-                color = if (isToday) colors.accent else colors.textSecondary,
-                fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = 3.dp, vertical = 1.dp)
             )
         }
     }

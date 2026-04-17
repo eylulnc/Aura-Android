@@ -3,6 +3,7 @@ package com.github.eylulnc.aura.ui.history
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.eylulnc.aura.model.MoodEntry
+import com.github.eylulnc.aura.preferences.AppPreferences
 import com.github.eylulnc.aura.repository.MoodRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,10 +13,13 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
 
+enum class SortOrder { Newest, Oldest }
+
 data class HistoryUiState(
     val allEntries: List<MoodEntry> = emptyList(),
     val selectedMonth: YearMonth = YearMonth.now(),
     val selectedDay: Int? = null,
+    val sortOrder: SortOrder = SortOrder.Newest,
     val sheetEntry: MoodEntry? = null,
     val pendingMoodId: Int? = null,
     val note: String = "",
@@ -26,7 +30,7 @@ data class HistoryUiState(
         get() {
             val all = allEntries
                 .filter { it.date.startsWith(selectedMonth.toString()) }
-                .sortedByDescending { it.timestamp }
+                .let { if (sortOrder == SortOrder.Newest) it.sortedByDescending { e -> e.timestamp } else it.sortedBy { e -> e.timestamp } }
             return if (selectedDay != null)
                 all.filter { it.date.takeLast(2).toInt() == selectedDay }
             else all
@@ -36,9 +40,15 @@ data class HistoryUiState(
         get() = allEntries
             .filter { it.date.startsWith(selectedMonth.toString()) }
             .associateBy { it.date.takeLast(2).toInt() }
+
 }
 
-class HistoryViewModel(private val repository: MoodRepository) : ViewModel() {
+class HistoryViewModel(
+    private val repository: MoodRepository,
+    private val prefs: AppPreferences
+) : ViewModel() {
+
+    val firstLaunchMonth: YearMonth = YearMonth.from(prefs.getFirstLaunchDate())
 
     private val _uiState = MutableStateFlow(HistoryUiState())
     val uiState: StateFlow<HistoryUiState> = _uiState.asStateFlow()
@@ -52,7 +62,11 @@ class HistoryViewModel(private val repository: MoodRepository) : ViewModel() {
     }
 
     fun prevMonth() {
-        _uiState.update { it.copy(selectedMonth = it.selectedMonth.minusMonths(1), selectedDay = null) }
+        _uiState.update {
+            if (it.selectedMonth > firstLaunchMonth)
+                it.copy(selectedMonth = it.selectedMonth.minusMonths(1), selectedDay = null)
+            else it
+        }
     }
 
     fun nextMonth() {
@@ -61,6 +75,12 @@ class HistoryViewModel(private val repository: MoodRepository) : ViewModel() {
 
     fun selectDay(day: Int) {
         _uiState.update { it.copy(selectedDay = if (it.selectedDay == day) null else day) }
+    }
+
+    fun toggleSort() {
+        _uiState.update {
+            it.copy(sortOrder = if (it.sortOrder == SortOrder.Newest) SortOrder.Oldest else SortOrder.Newest)
+        }
     }
 
     fun openSheet(entry: MoodEntry) {
