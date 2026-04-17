@@ -9,23 +9,33 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.time.YearMonth
 
 data class HistoryUiState(
     val allEntries: List<MoodEntry> = emptyList(),
     val selectedMonth: YearMonth = YearMonth.now(),
+    val selectedDay: Int? = null,
     val sheetEntry: MoodEntry? = null,
     val pendingMoodId: Int? = null,
     val note: String = "",
-    val isSheetOpen: Boolean = false
+    val isSheetOpen: Boolean = false,
+    val isEditMode: Boolean = false
 ) {
     val monthEntries: List<MoodEntry>
-        get() = allEntries
-            .filter { it.date.startsWith(selectedMonth.toString()) }
-            .sortedByDescending { it.timestamp }
+        get() {
+            val all = allEntries
+                .filter { it.date.startsWith(selectedMonth.toString()) }
+                .sortedByDescending { it.timestamp }
+            return if (selectedDay != null)
+                all.filter { it.date.takeLast(2).toInt() == selectedDay }
+            else all
+        }
 
     val entryByDay: Map<Int, MoodEntry>
-        get() = monthEntries.associateBy { it.date.takeLast(2).toInt() }
+        get() = allEntries
+            .filter { it.date.startsWith(selectedMonth.toString()) }
+            .associateBy { it.date.takeLast(2).toInt() }
 }
 
 class HistoryViewModel(private val repository: MoodRepository) : ViewModel() {
@@ -42,20 +52,26 @@ class HistoryViewModel(private val repository: MoodRepository) : ViewModel() {
     }
 
     fun prevMonth() {
-        _uiState.update { it.copy(selectedMonth = it.selectedMonth.minusMonths(1)) }
+        _uiState.update { it.copy(selectedMonth = it.selectedMonth.minusMonths(1), selectedDay = null) }
     }
 
     fun nextMonth() {
-        _uiState.update { it.copy(selectedMonth = it.selectedMonth.plusMonths(1)) }
+        _uiState.update { it.copy(selectedMonth = it.selectedMonth.plusMonths(1), selectedDay = null) }
+    }
+
+    fun selectDay(day: Int) {
+        _uiState.update { it.copy(selectedDay = if (it.selectedDay == day) null else day) }
     }
 
     fun openSheet(entry: MoodEntry) {
+        val isToday = entry.date == LocalDate.now().toString()
         _uiState.update {
             it.copy(
                 sheetEntry = entry,
                 pendingMoodId = entry.mood,
                 note = entry.note ?: "",
-                isSheetOpen = true
+                isSheetOpen = true,
+                isEditMode = isToday
             )
         }
     }
