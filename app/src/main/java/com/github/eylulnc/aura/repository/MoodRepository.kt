@@ -19,14 +19,18 @@ class MoodRepository(private val dao: MoodDao) {
 
 
     suspend fun logMood(moodId: Int, note: String?) {
-        val entry = MoodEntry(
-            id = UUID.randomUUID().toString(),
-            date = today(),
-            timestamp = System.currentTimeMillis(),
-            mood = moodId,
-            note = note?.ifBlank { null }
-        )
-        dao.insert(entry)
+        val existing = dao.getByDate(today())
+        if (existing != null) {
+            dao.update(existing.copy(mood = moodId, note = note?.ifBlank { null }, timestamp = System.currentTimeMillis()))
+        } else {
+            dao.insert(MoodEntry(
+                id = UUID.randomUUID().toString(),
+                date = today(),
+                timestamp = System.currentTimeMillis(),
+                mood = moodId,
+                note = note?.ifBlank { null }
+            ))
+        }
         // TODO: if signed in → sync to Firestore
     }
 

@@ -1,9 +1,10 @@
 package com.github.eylulnc.aura.model
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "mood_entries")
+@Entity(tableName = "mood_entries", indices = [Index(value = ["date"], unique = true)])
 data class MoodEntry(
     @PrimaryKey val id: String,         // UUID
     val userId: String? = null,         // Firebase UID — null for guest

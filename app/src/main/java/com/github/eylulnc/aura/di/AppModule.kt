@@ -17,7 +17,7 @@ val appModule = module {
             androidContext(),
             AuraDatabase::class.java,
             "aura.db"
-        ).build()
+        ).addMigrations(AuraDatabase.MIGRATION_1_2).build()
     }
 
     single { get<AuraDatabase>().moodDao() }
