@@ -1,3 +1,25 @@
 <resources>
     <string name="app_name">Aura</string>
+
+    <!-- Today screen -->
+    <string name="today_prompt_empty">How are you feeling?</string>
+    <string name="today_prompt_logged">You\'re feeling</string>
+    <string name="today_note_placeholder">Add a note… (optional)</string>
+    <string name="today_note_label">Your note</string>
+    <string name="today_action_log">Log mood</string>
+    <string name="today_action_update">Update</string>
+    <string name="today_action_edit">Edit</string>
+    <string name="today_action_cancel">Cancel</string>
+
+    <!-- Navigation tabs -->
+    <string name="tab_today">Today</string>
+    <string name="tab_history">History</string>
+    <string name="tab_settings">Settings</string>
+
+    <!-- History screen -->
+    <string name="history_no_entries">No entries this month</string>
+    <string name="history_action_delete">Delete entry</string>
+
+    <!-- Placeholders -->
+    <string name="settings_coming_soon">Settings — coming soon</string>
 </resources>
