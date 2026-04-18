@@ -42,18 +42,20 @@ class SettingsViewModel(
     fun signIn(activityContext: Context, onResult: ((Boolean) -> Unit)? = null) {
         viewModelScope.launch {
             _isSyncing.value = true
-            val result = authRepository.signInWithGoogle(activityContext)
-            if (result.isSuccess) {
-                repository.syncAllToFirestore()
-                repository.getEarliestEntryDate()?.let { dateStr ->
-                    prefs.updateFirstLaunchIfEarlier(java.time.LocalDate.parse(dateStr))
+            try {
+                val result = authRepository.signInWithGoogle(activityContext)
+                if (result.isSuccess) {
+                    repository.syncAllToFirestore()
+                    repository.getEarliestEntryDate()?.let { dateStr ->
+                        prefs.updateFirstLaunchIfEarlier(java.time.LocalDate.parse(dateStr))
+                    }
+                    onResult?.invoke(true)
+                } else {
+                    _signInError.value = result.exceptionOrNull()?.message
+                    onResult?.invoke(false)
                 }
+            } finally {
                 _isSyncing.value = false
-                onResult?.invoke(true)
-            } else {
-                _isSyncing.value = false
-                _signInError.value = result.exceptionOrNull()?.message
-                onResult?.invoke(false)
             }
         }
     }
