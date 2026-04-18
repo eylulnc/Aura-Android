@@ -36,7 +36,7 @@ class SettingsViewModel(
         _themeMode.value = mode
     }
 
-    fun signIn(activityContext: Context) {
+    fun signIn(activityContext: Context, onResult: ((Boolean) -> Unit)? = null) {
         viewModelScope.launch {
             val result = authRepository.signInWithGoogle(activityContext)
             if (result.isSuccess) {
@@ -44,11 +44,15 @@ class SettingsViewModel(
                 repository.getEarliestEntryDate()?.let { dateStr ->
                     prefs.updateFirstLaunchIfEarlier(java.time.LocalDate.parse(dateStr))
                 }
+                onResult?.invoke(true)
             } else {
                 _signInError.value = result.exceptionOrNull()?.message
+                onResult?.invoke(false)
             }
         }
     }
+
+    fun completeOnboarding() = prefs.setOnboardingCompleted()
 
     fun signOut() {
         authRepository.signOut()
