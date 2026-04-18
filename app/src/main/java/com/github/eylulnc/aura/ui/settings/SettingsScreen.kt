@@ -25,9 +25,11 @@ import org.koin.androidx.compose.koinViewModel
 fun SettingsScreen(viewModel: SettingsViewModel = koinViewModel()) {
     val colors = auraColors
     val themeMode by viewModel.themeMode.collectAsState()
+    val currentUser by viewModel.currentUser.collectAsState()
+    val signInError by viewModel.signInError.collectAsState()
     var showDeleteDialog by remember { mutableStateOf(false) }
-
     val context = LocalContext.current
+
     val versionName = remember {
         context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "—"
     }
@@ -45,6 +47,36 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinViewModel()) {
                 .padding(top = Spacing.xl),
             verticalArrangement = Arrangement.spacedBy(Spacing.xl)
         ) {
+            SettingsGroup(label = stringResource(R.string.settings_section_account), colors = colors) {
+                if (currentUser != null) {
+                    Text(
+                        text = currentUser!!.email ?: currentUser!!.displayName ?: "",
+                        fontSize = FontSize.s,
+                        color = colors.textSecondary
+                    )
+                    Spacer(Modifier.height(Spacing.m))
+                    Text(
+                        text = stringResource(R.string.settings_sign_out),
+                        fontSize = FontSize.m,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier
+                            .clickable { viewModel.signOut() }
+                            .fillMaxWidth()
+                            .padding(vertical = Spacing.xs)
+                    )
+                } else {
+                    Text(
+                        text = stringResource(R.string.settings_sign_in),
+                        fontSize = FontSize.m,
+                        color = colors.accent,
+                        modifier = Modifier
+                            .clickable { viewModel.signIn(context) }
+                            .fillMaxWidth()
+                            .padding(vertical = Spacing.xs)
+                    )
+                }
+            }
+
             SettingsGroup(label = stringResource(R.string.settings_section_appearance), colors = colors) {
                 ThemePicker(selected = themeMode, onSelect = viewModel::setThemeMode, colors = colors)
             }
@@ -102,6 +134,20 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinViewModel()) {
                 )
             }
         }
+    }
+
+    signInError?.let { error ->
+        AlertDialog(
+            onDismissRequest = { viewModel.clearSignInError() },
+            title = { Text(stringResource(R.string.settings_sign_in_error_title)) },
+            text = { Text(error) },
+            confirmButton = {
+                TextButton(onClick = { viewModel.clearSignInError() }) {
+                    Text(stringResource(R.string.settings_delete_cancel))
+                }
+            },
+            containerColor = colors.surface
+        )
     }
 
     if (showDeleteDialog) {
