@@ -94,7 +94,7 @@ fun HistoryScreen(viewModel: HistoryViewModel = koinViewModel()) {
             item {
                 MonthHeader(
                     month = state.selectedMonth,
-                    earliestMonth = viewModel.firstLaunchMonth,
+                    earliestMonth = state.firstEntryMonth,
                     onPrev = viewModel::prevMonth,
                     onNext = viewModel::nextMonth,
                     onGoToToday = viewModel::goToToday,

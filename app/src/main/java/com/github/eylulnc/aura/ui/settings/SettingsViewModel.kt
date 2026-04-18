@@ -41,6 +41,9 @@ class SettingsViewModel(
             val result = authRepository.signInWithGoogle(activityContext)
             if (result.isSuccess) {
                 repository.syncAllToFirestore()
+                repository.getEarliestEntryDate()?.let { dateStr ->
+                    prefs.updateFirstLaunchIfEarlier(java.time.LocalDate.parse(dateStr))
+                }
             } else {
                 _signInError.value = result.exceptionOrNull()?.message
             }

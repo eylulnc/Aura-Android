@@ -31,6 +31,6 @@ val appModule = module {
     single { AppPreferences(androidContext()) }
 
     viewModel { TodayViewModel(get()) }
-    viewModel { HistoryViewModel(get(), get()) }
+    viewModel { HistoryViewModel(get()) }
     viewModel { SettingsViewModel(get(), get(), get()) }
 }

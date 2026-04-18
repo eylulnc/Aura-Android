@@ -3,7 +3,6 @@ package com.github.eylulnc.aura.ui.history
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.eylulnc.aura.model.MoodEntry
-import com.github.eylulnc.aura.preferences.AppPreferences
 import com.github.eylulnc.aura.repository.MoodRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,6 +25,10 @@ data class HistoryUiState(
     val isSheetOpen: Boolean = false,
     val isEditMode: Boolean = false
 ) {
+    val firstEntryMonth: YearMonth
+        get() = allEntries.minOfOrNull { it.date }
+            ?.let { YearMonth.parse(it.substring(0, 7)) }
+            ?: YearMonth.now()
     val monthEntries: List<MoodEntry>
         get() {
             val all = allEntries
@@ -44,11 +47,8 @@ data class HistoryUiState(
 }
 
 class HistoryViewModel(
-    private val repository: MoodRepository,
-    prefs: AppPreferences
+    private val repository: MoodRepository
 ) : ViewModel() {
-
-    val firstLaunchMonth: YearMonth = YearMonth.from(prefs.getFirstLaunchDate())
 
     private val _uiState = MutableStateFlow(HistoryUiState())
     val uiState: StateFlow<HistoryUiState> = _uiState.asStateFlow()
@@ -63,7 +63,7 @@ class HistoryViewModel(
 
     fun prevMonth() {
         _uiState.update {
-            if (it.selectedMonth > firstLaunchMonth)
+            if (it.selectedMonth > it.firstEntryMonth)
                 it.copy(selectedMonth = it.selectedMonth.minusMonths(1), selectedDay = null)
             else it
         }
