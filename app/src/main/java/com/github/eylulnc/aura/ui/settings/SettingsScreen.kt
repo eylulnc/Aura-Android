@@ -16,6 +16,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
+import androidx.compose.foundation.shape.CircleShape
+import coil.compose.AsyncImage
 import com.github.eylulnc.aura.BuildConfig
 import com.github.eylulnc.aura.R
 import com.github.eylulnc.aura.ui.theme.*
@@ -49,11 +51,43 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinViewModel()) {
         ) {
             SettingsGroup(label = stringResource(R.string.settings_section_account), colors = colors) {
                 if (currentUser != null) {
-                    Text(
-                        text = currentUser!!.email ?: currentUser!!.displayName ?: "",
-                        fontSize = FontSize.s,
-                        color = colors.textSecondary
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.m)
+                    ) {
+                        if (currentUser!!.photoUrl != null) {
+                            AsyncImage(
+                                model = currentUser!!.photoUrl,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(Spacing.xl + Spacing.m)
+                                    .clip(CircleShape)
+                            )
+                        } else {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(Spacing.xl + Spacing.m)
+                                    .clip(CircleShape)
+                                    .background(colors.surfaceSubtle)
+                            ) {
+                                Text(
+                                    text = currentUser!!.displayName?.firstOrNull()?.uppercase() ?: "?",
+                                    fontSize = FontSize.m,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = colors.accent
+                                )
+                            }
+                        }
+                        Column {
+                            currentUser!!.displayName?.let {
+                                Text(text = it, fontSize = FontSize.m, color = colors.textPrimary, fontWeight = FontWeight.Medium)
+                            }
+                            currentUser!!.email?.let {
+                                Text(text = it, fontSize = FontSize.s, color = colors.textSecondary)
+                            }
+                        }
+                    }
                     Spacer(Modifier.height(Spacing.m))
                     Text(
                         text = stringResource(R.string.settings_sign_out),
