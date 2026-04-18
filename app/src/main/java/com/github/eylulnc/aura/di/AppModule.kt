@@ -5,6 +5,7 @@ import com.github.eylulnc.aura.preferences.AppPreferences
 import com.github.eylulnc.aura.repository.AuraDatabase
 import com.github.eylulnc.aura.repository.MoodRepository
 import com.github.eylulnc.aura.ui.history.HistoryViewModel
+import com.github.eylulnc.aura.ui.settings.SettingsViewModel
 import com.github.eylulnc.aura.viewmodel.TodayViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -28,4 +29,5 @@ val appModule = module {
 
     viewModel { TodayViewModel(get()) }
     viewModel { HistoryViewModel(get(), get()) }
+    viewModel { SettingsViewModel(get(), get()) }
 }
