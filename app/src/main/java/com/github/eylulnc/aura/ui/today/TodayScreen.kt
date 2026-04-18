@@ -33,6 +33,16 @@ fun TodayScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val colors = auraColors
+
+    if (state.isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(colors.background)
+        )
+        return
+    }
+
     val showPicker = state.todayEntry == null || state.isEditing
 
     Column(

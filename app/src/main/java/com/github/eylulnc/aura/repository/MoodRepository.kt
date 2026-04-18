@@ -1,7 +1,10 @@
 package com.github.eylulnc.aura.repository
 
+import com.github.eylulnc.aura.auth.AuthRepository
 import com.github.eylulnc.aura.model.MoodEntry
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.tasks.await
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -9,7 +12,12 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 import kotlin.random.Random
 
-class MoodRepository(private val dao: MoodDao) {
+class MoodRepository(
+    private val dao: MoodDao,
+    private val authRepository: AuthRepository
+) {
+
+    private val firestore = FirebaseFirestore.getInstance()
 
     fun getAllFlow(): Flow<List<MoodEntry>> = dao.getAllFlow()
 
@@ -17,38 +25,91 @@ class MoodRepository(private val dao: MoodDao) {
 
     suspend fun getAll(): List<MoodEntry> = dao.getAll()
 
+    suspend fun getEarliestEntryDate(): String? = dao.getEarliestDate()
+
     suspend fun getToday(): MoodEntry? = dao.getByDate(today())
 
-
     suspend fun logMood(moodId: Int, note: String?) {
+        val userId = authRepository.currentUser?.uid
         val existing = dao.getByDate(today())
         if (existing != null) {
-            dao.update(existing.copy(mood = moodId, note = note?.ifBlank { null }, timestamp = System.currentTimeMillis()))
+            val updated = existing.copy(
+                mood = moodId,
+                note = note?.ifBlank { null },
+                timestamp = System.currentTimeMillis()
+            )
+            dao.update(updated)
+            syncToFirestore(updated)
         } else {
-            dao.insert(MoodEntry(
+            val entry = MoodEntry(
                 id = UUID.randomUUID().toString(),
+                userId = userId,
                 date = today(),
                 timestamp = System.currentTimeMillis(),
                 mood = moodId,
                 note = note?.ifBlank { null }
-            ))
+            )
+            dao.insert(entry)
+            syncToFirestore(entry)
         }
-        // TODO: if signed in → sync to Firestore
     }
 
     suspend fun editMood(entry: MoodEntry, moodId: Int, note: String?) {
-        dao.update(entry.copy(mood = moodId, note = note?.ifBlank { null }))
-        // TODO: if signed in → sync to Firestore
+        val updated = entry.copy(mood = moodId, note = note?.ifBlank { null })
+        dao.update(updated)
+        syncToFirestore(updated)
     }
 
     suspend fun deleteMood(entry: MoodEntry) {
         dao.delete(entry)
-        // TODO: if signed in → delete from Firestore
+        val userId = authRepository.currentUser?.uid ?: return
+        firestore.userEntries(userId).document(entry.id).delete().await()
     }
 
     suspend fun deleteAll() {
         dao.deleteAll()
-        // TODO: if signed in → delete all from Firestore
+        val userId = authRepository.currentUser?.uid ?: return
+        val docs = firestore.userEntries(userId).get().await()
+        docs.forEach { firestore.userEntries(userId).document(it.id).delete().await() }
+    }
+
+    suspend fun syncAllToFirestore() {
+        val userId = authRepository.currentUser?.uid ?: return
+        val now = System.currentTimeMillis()
+
+        // Push local entries to Firestore
+        val localEntries = dao.getAll()
+        localEntries.forEach { entry ->
+            val withUser = entry.copy(userId = userId, syncedAt = now)
+            dao.update(withUser)
+            firestore.userEntries(userId).document(withUser.id).set(withUser.toMap()).await()
+        }
+
+        // Pull remote entries not present locally
+        val localIds = localEntries.map { it.id }.toSet()
+        val remoteEntries = firestore.userEntries(userId).get().await()
+        remoteEntries.forEach { doc ->
+            if (doc.id !in localIds) {
+                val entry = MoodEntry(
+                    id = doc.id,
+                    userId = doc.getString("userId"),
+                    date = doc.getString("date") ?: return@forEach,
+                    timestamp = doc.getLong("timestamp") ?: return@forEach,
+                    mood = doc.getLong("mood")?.toInt() ?: return@forEach,
+                    note = doc.getString("note"),
+                    syncedAt = doc.getLong("syncedAt")
+                )
+                dao.insert(entry)
+            }
+        }
+    }
+
+    private suspend fun syncToFirestore(entry: MoodEntry) {
+        val userId = authRepository.currentUser?.uid ?: return
+        val now = System.currentTimeMillis()
+        val synced = entry.copy(userId = userId, syncedAt = now)
+        dao.update(synced)
+        firestore.userEntries(userId).document(synced.id).set(synced.toMap()).await()
     }
 
     suspend fun seedDemoData() {
@@ -77,3 +138,16 @@ class MoodRepository(private val dao: MoodDao) {
             Instant.now().atZone(ZoneId.systemDefault())
         )
 }
+
+private fun FirebaseFirestore.userEntries(userId: String) =
+    collection("users").document(userId).collection("mood_entries")
+
+private fun MoodEntry.toMap() = mapOf(
+    "id" to id,
+    "userId" to userId,
+    "date" to date,
+    "timestamp" to timestamp,
+    "mood" to mood,
+    "note" to note,
+    "syncedAt" to syncedAt
+)

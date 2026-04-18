@@ -27,6 +27,13 @@ object Spacing {
 
     // Component sizes
     val noteInputMinHeight = 80.dp
+
+    // Login screen
+    val loginIconSize = 160.dp
+    val loginIconRadius = 36.dp
+    val loginIconShadowElevation = 32.dp
+    val loginDividerWidth = 80.dp
+    val radiusPill = 50.dp
 }
 
 object FontSize {

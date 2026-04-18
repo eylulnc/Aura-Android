@@ -1,6 +1,7 @@
 package com.github.eylulnc.aura.di
 
 import androidx.room.Room
+import com.github.eylulnc.aura.auth.AuthRepository
 import com.github.eylulnc.aura.preferences.AppPreferences
 import com.github.eylulnc.aura.repository.AuraDatabase
 import com.github.eylulnc.aura.repository.MoodRepository
@@ -23,11 +24,13 @@ val appModule = module {
 
     single { get<AuraDatabase>().moodDao() }
 
-    single { MoodRepository(get()) }
+    single { AuthRepository() }
+
+    single { MoodRepository(get(), get()) }
 
     single { AppPreferences(androidContext()) }
 
     viewModel { TodayViewModel(get()) }
-    viewModel { HistoryViewModel(get(), get()) }
-    viewModel { SettingsViewModel(get(), get()) }
+    viewModel { HistoryViewModel(get()) }
+    viewModel { SettingsViewModel(get(), get(), get()) }
 }

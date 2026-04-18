@@ -20,6 +20,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.github.eylulnc.aura.R
 import com.github.eylulnc.aura.ui.history.HistoryScreen
+import com.github.eylulnc.aura.ui.onboarding.LoginScreen
 import com.github.eylulnc.aura.ui.settings.SettingsScreen
 import com.github.eylulnc.aura.ui.settings.SettingsViewModel
 import com.github.eylulnc.aura.ui.theme.auraColors
@@ -33,8 +34,35 @@ sealed class Screen(val route: String, val labelRes: Int, val icon: ImageVector)
 
 private val tabs = listOf(Screen.Today, Screen.History, Screen.Settings)
 
+private const val ROUTE_ONBOARDING = "onboarding"
+private const val ROUTE_MAIN = "main"
+
 @Composable
-fun AppNavigation(settingsViewModel: SettingsViewModel) {
+fun AppNavigation(settingsViewModel: SettingsViewModel, showOnboarding: Boolean) {
+    val rootNavController = rememberNavController()
+
+    NavHost(
+        navController = rootNavController,
+        startDestination = if (showOnboarding) ROUTE_ONBOARDING else ROUTE_MAIN
+    ) {
+        composable(ROUTE_ONBOARDING) {
+            LoginScreen(
+                viewModel = settingsViewModel,
+                onComplete = {
+                    rootNavController.navigate(ROUTE_MAIN) {
+                        popUpTo(ROUTE_ONBOARDING) { inclusive = true }
+                    }
+                }
+            )
+        }
+        composable(ROUTE_MAIN) {
+            MainScaffold(settingsViewModel)
+        }
+    }
+}
+
+@Composable
+private fun MainScaffold(settingsViewModel: SettingsViewModel) {
     val navController = rememberNavController()
     val colors = auraColors
     val navBackStackEntry by navController.currentBackStackEntryAsState()
