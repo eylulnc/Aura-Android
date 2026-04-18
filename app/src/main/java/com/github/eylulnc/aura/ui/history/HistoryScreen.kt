@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -304,41 +305,53 @@ private fun DayCell(
     onClick: () -> Unit
 ) {
     val face = entry?.let { getMoodFace(it.mood) }
-    val borderColor = when {
-        isToday || isSelected -> colors.accent
-        else -> colors.border
-    }
-    val bgColor = if (isSelected) colors.accent.copy(alpha = 0.12f) else Color.Transparent
+    val moodColor = face?.let { Color(it.color.toColorInt()) }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
+    Box(
+        contentAlignment = Alignment.Center,
         modifier = Modifier
             .fillMaxSize()
-            .padding(2.dp)
-            .clip(RoundedCornerShape(Spacing.radiusCard))
-            .background(bgColor)
-            .border(Spacing.borderWidth, borderColor, RoundedCornerShape(Spacing.radiusCard))
+            .padding(3.dp)
             .clickable(enabled = entry != null, onClick = onClick)
-            .padding(top = 3.dp, bottom = 2.dp)
     ) {
-        Text(
-            text = day.toString(),
-            fontSize = FontSize.xs,
-            color = when {
-                isToday || isSelected -> colors.accent
-                face != null -> colors.textPrimary
-                else -> colors.textSecondary
-            },
-            fontWeight = if (isToday || isSelected) FontWeight.Bold else FontWeight.Normal
-        )
-        if (face != null) {
-            MoodSvgImage(
-                moodFace = face,
+        val borderColor = when {
+            isSelected -> colors.accent
+            isToday -> moodColor ?: colors.accent
+            else -> colors.border
+        }
+        val borderWidth = if (isToday || isSelected) 2.dp else 1.dp
+
+        if (face != null && moodColor != null) {
+            Box(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(horizontal = 3.dp, vertical = 1.dp)
-            )
+                    .fillMaxSize()
+                    .clip(CircleShape)
+                    .background(moodColor.copy(alpha = 0.18f))
+                    .border(borderWidth, borderColor, CircleShape)
+            ) {
+                MoodSvgImage(
+                    moodFace = face,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(3.dp)
+                )
+            }
+        } else {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(CircleShape)
+                    .border(borderWidth, borderColor, CircleShape)
+            ) {
+                Text(
+                    text = day.toString(),
+                    fontSize = FontSize.xs,
+                    color = if (isToday) colors.accent else colors.textSecondary,
+                    fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal
+                )
+            }
         }
     }
 }
