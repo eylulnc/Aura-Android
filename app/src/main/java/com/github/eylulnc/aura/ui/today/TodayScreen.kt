@@ -36,7 +36,7 @@ fun TodayScreen(
 
     if (state.isLoading) {
         Box(
-            modifier = androidx.compose.ui.Modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .background(colors.background)
         )
