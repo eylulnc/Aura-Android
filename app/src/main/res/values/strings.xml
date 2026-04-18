@@ -20,6 +20,12 @@
     <string name="history_no_entries">No entries this month</string>
     <string name="history_action_delete">Delete entry</string>
 
+    <!-- Settings / Account -->
+    <string name="settings_section_account">Account</string>
+    <string name="settings_sign_in">Sign in with Google</string>
+    <string name="settings_sign_out">Sign out</string>
+    <string name="settings_sign_in_error_title">Sign in failed</string>
+
     <!-- Settings screen -->
     <string name="settings_title">Settings</string>
     <string name="settings_section_appearance">Appearance</string>
