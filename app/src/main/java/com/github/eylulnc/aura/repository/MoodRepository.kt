@@ -25,6 +25,8 @@ class MoodRepository(
 
     suspend fun getAll(): List<MoodEntry> = dao.getAll()
 
+    suspend fun getEarliestEntryDate(): String? = dao.getEarliestDate()
+
     suspend fun getToday(): MoodEntry? = dao.getByDate(today())
 
     suspend fun logMood(moodId: Int, note: String?) {
@@ -73,12 +75,32 @@ class MoodRepository(
 
     suspend fun syncAllToFirestore() {
         val userId = authRepository.currentUser?.uid ?: return
-        val entries = dao.getAll()
         val now = System.currentTimeMillis()
-        entries.forEach { entry ->
+
+        // Push local entries to Firestore
+        val localEntries = dao.getAll()
+        localEntries.forEach { entry ->
             val withUser = entry.copy(userId = userId, syncedAt = now)
             dao.update(withUser)
             firestore.userEntries(userId).document(withUser.id).set(withUser.toMap()).await()
+        }
+
+        // Pull remote entries not present locally
+        val localIds = localEntries.map { it.id }.toSet()
+        val remoteEntries = firestore.userEntries(userId).get().await()
+        remoteEntries.forEach { doc ->
+            if (doc.id !in localIds) {
+                val entry = MoodEntry(
+                    id = doc.id,
+                    userId = doc.getString("userId"),
+                    date = doc.getString("date") ?: return@forEach,
+                    timestamp = doc.getLong("timestamp") ?: return@forEach,
+                    mood = doc.getLong("mood")?.toInt() ?: return@forEach,
+                    note = doc.getString("note"),
+                    syncedAt = doc.getLong("syncedAt")
+                )
+                dao.insert(entry)
+            }
         }
     }
 

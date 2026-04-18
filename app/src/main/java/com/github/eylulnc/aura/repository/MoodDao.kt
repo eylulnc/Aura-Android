@@ -33,4 +33,7 @@ interface MoodDao {
 
     @Query("SELECT * FROM mood_entries WHERE id = :id")
     suspend fun getById(id: String): MoodEntry?
+
+    @Query("SELECT MIN(date) FROM mood_entries")
+    suspend fun getEarliestDate(): String?
 }
