@@ -20,6 +20,12 @@ class AppPreferences(context: Context) {
             ?.let { LocalDate.parse(it) }
             ?: LocalDate.now()
 
+    fun updateFirstLaunchIfEarlier(date: LocalDate) {
+        if (date.isBefore(getFirstLaunchDate())) {
+            prefs.edit { putString(KEY_FIRST_LAUNCH, date.toString()) }
+        }
+    }
+
     fun getThemeMode(): ThemeMode =
         ThemeMode.valueOf(prefs.getString(KEY_THEME, ThemeMode.SYSTEM.name) ?: ThemeMode.SYSTEM.name)
 
