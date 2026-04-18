@@ -32,8 +32,13 @@ class AppPreferences(context: Context) {
     fun setThemeMode(mode: ThemeMode) =
         prefs.edit { putString(KEY_THEME, mode.name) }
 
+    fun hasCompletedOnboarding(): Boolean = prefs.getBoolean(KEY_ONBOARDING_DONE, false)
+
+    fun setOnboardingCompleted() = prefs.edit { putBoolean(KEY_ONBOARDING_DONE, true) }
+
     companion object {
         private const val KEY_FIRST_LAUNCH = "first_launch_date"
         private const val KEY_THEME = "theme_mode"
+        private const val KEY_ONBOARDING_DONE = "onboarding_done"
     }
 }

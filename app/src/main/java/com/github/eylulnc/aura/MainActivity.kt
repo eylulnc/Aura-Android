@@ -7,16 +7,22 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.github.eylulnc.aura.preferences.AppPreferences
 import com.github.eylulnc.aura.ui.navigation.AppNavigation
 import com.github.eylulnc.aura.ui.settings.SettingsViewModel
 import com.github.eylulnc.aura.ui.settings.ThemeMode
 import com.github.eylulnc.aura.ui.theme.AuraTheme
+import org.koin.android.ext.android.inject
 import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
+
+    private val prefs: AppPreferences by inject()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val showOnboarding = !prefs.hasCompletedOnboarding()
         setContent {
             val settingsViewModel: SettingsViewModel = koinViewModel()
             val themeMode by settingsViewModel.themeMode.collectAsState()
@@ -26,7 +32,7 @@ class MainActivity : ComponentActivity() {
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
             }
             AuraTheme(darkTheme = darkTheme) {
-                AppNavigation(settingsViewModel)
+                AppNavigation(settingsViewModel, showOnboarding)
             }
         }
     }
