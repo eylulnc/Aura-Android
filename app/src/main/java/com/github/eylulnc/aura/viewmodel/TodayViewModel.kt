@@ -14,7 +14,8 @@ data class TodayUiState(
     val todayEntry: MoodEntry? = null,
     val isEditing: Boolean = false,
     val pendingMoodId: Int? = null,
-    val note: String = ""
+    val note: String = "",
+    val isLoading: Boolean = true
 )
 
 class TodayViewModel(private val repository: MoodRepository) : ViewModel() {
@@ -26,8 +27,8 @@ class TodayViewModel(private val repository: MoodRepository) : ViewModel() {
         viewModelScope.launch {
             repository.getTodayFlow().collect { entry ->
                 _uiState.update {
-                    if (it.isEditing) it.copy(todayEntry = entry)
-                    else it.copy(todayEntry = entry, pendingMoodId = entry?.mood, note = entry?.note ?: "")
+                    if (it.isEditing) it.copy(todayEntry = entry, isLoading = false)
+                    else it.copy(todayEntry = entry, pendingMoodId = entry?.mood, note = entry?.note ?: "", isLoading = false)
                 }
             }
         }

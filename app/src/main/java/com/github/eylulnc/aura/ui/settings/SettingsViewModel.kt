@@ -31,6 +31,9 @@ class SettingsViewModel(
     private val _signInError = MutableStateFlow<String?>(null)
     val signInError: StateFlow<String?> = _signInError.asStateFlow()
 
+    private val _isSyncing = MutableStateFlow(false)
+    val isSyncing: StateFlow<Boolean> = _isSyncing.asStateFlow()
+
     fun setThemeMode(mode: ThemeMode) {
         prefs.setThemeMode(mode)
         _themeMode.value = mode
@@ -38,14 +41,17 @@ class SettingsViewModel(
 
     fun signIn(activityContext: Context, onResult: ((Boolean) -> Unit)? = null) {
         viewModelScope.launch {
+            _isSyncing.value = true
             val result = authRepository.signInWithGoogle(activityContext)
             if (result.isSuccess) {
                 repository.syncAllToFirestore()
                 repository.getEarliestEntryDate()?.let { dateStr ->
                     prefs.updateFirstLaunchIfEarlier(java.time.LocalDate.parse(dateStr))
                 }
+                _isSyncing.value = false
                 onResult?.invoke(true)
             } else {
+                _isSyncing.value = false
                 _signInError.value = result.exceptionOrNull()?.message
                 onResult?.invoke(false)
             }

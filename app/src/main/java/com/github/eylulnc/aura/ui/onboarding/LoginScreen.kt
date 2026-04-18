@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -41,9 +42,10 @@ fun LoginScreen(
     val context = LocalContext.current
     val currentUser by viewModel.currentUser.collectAsState()
     val signInError by viewModel.signInError.collectAsState()
+    val isSyncing by viewModel.isSyncing.collectAsState()
 
-    LaunchedEffect(currentUser) {
-        if (currentUser != null) {
+    LaunchedEffect(currentUser, isSyncing) {
+        if (currentUser != null && !isSyncing) {
             viewModel.completeOnboarding()
             onComplete()
         }
@@ -130,15 +132,23 @@ fun LoginScreen(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(Spacing.radiusPill))
                 .background(colors.accent)
-                .clickable { viewModel.signIn(context) }
+                .clickable(enabled = !isSyncing) { viewModel.signIn(context) }
                 .padding(vertical = Spacing.l)
         ) {
-            Text(
-                text = stringResource(R.string.login_sign_in),
-                fontSize = FontSize.m,
-                fontWeight = FontWeight.Medium,
-                color = colors.background
-            )
+            if (isSyncing) {
+                CircularProgressIndicator(
+                    color = colors.background,
+                    strokeWidth = 2.dp,
+                    modifier = Modifier.size(FontSize.m.value.dp)
+                )
+            } else {
+                Text(
+                    text = stringResource(R.string.login_sign_in),
+                    fontSize = FontSize.m,
+                    fontWeight = FontWeight.Medium,
+                    color = colors.background
+                )
+            }
         }
 
         Spacer(Modifier.height(Spacing.m))
