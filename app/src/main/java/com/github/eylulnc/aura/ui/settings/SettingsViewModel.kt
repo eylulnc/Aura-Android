@@ -30,4 +30,8 @@ class SettingsViewModel(
             onComplete()
         }
     }
+
+    fun seedDemoData() {
+        viewModelScope.launch { repository.seedDemoData() }
+    }
 }

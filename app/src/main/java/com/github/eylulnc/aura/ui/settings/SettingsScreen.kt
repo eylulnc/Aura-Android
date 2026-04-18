@@ -16,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
+import com.github.eylulnc.aura.BuildConfig
 import com.github.eylulnc.aura.R
 import com.github.eylulnc.aura.ui.theme.*
 import org.koin.androidx.compose.koinViewModel
@@ -46,6 +47,20 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinViewModel()) {
         ) {
             SettingsGroup(label = stringResource(R.string.settings_section_appearance), colors = colors) {
                 ThemePicker(selected = themeMode, onSelect = viewModel::setThemeMode, colors = colors)
+            }
+
+            if (BuildConfig.DEBUG) {
+                SettingsGroup(label = "Dev", colors = colors) {
+                    Text(
+                        text = "Seed demo data (Nov → yesterday)",
+                        fontSize = FontSize.m,
+                        color = colors.accent,
+                        modifier = Modifier
+                            .clickable { viewModel.seedDemoData() }
+                            .fillMaxWidth()
+                            .padding(vertical = Spacing.xs)
+                    )
+                }
             }
 
             SettingsGroup(label = stringResource(R.string.settings_section_data), colors = colors) {
