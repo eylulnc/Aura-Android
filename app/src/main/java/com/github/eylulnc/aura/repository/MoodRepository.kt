@@ -11,6 +11,8 @@ class MoodRepository(private val dao: MoodDao) {
 
     fun getAllFlow(): Flow<List<MoodEntry>> = dao.getAllFlow()
 
+    fun getTodayFlow(): Flow<MoodEntry?> = dao.getByDateFlow(today())
+
     suspend fun getAll(): List<MoodEntry> = dao.getAll()
 
     suspend fun getToday(): MoodEntry? = dao.getByDate(today())

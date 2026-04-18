@@ -1,8 +1,10 @@
 package com.github.eylulnc.aura.di
 
 import androidx.room.Room
+import com.github.eylulnc.aura.preferences.AppPreferences
 import com.github.eylulnc.aura.repository.AuraDatabase
 import com.github.eylulnc.aura.repository.MoodRepository
+import com.github.eylulnc.aura.ui.history.HistoryViewModel
 import com.github.eylulnc.aura.viewmodel.TodayViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -22,5 +24,8 @@ val appModule = module {
 
     single { MoodRepository(get()) }
 
+    single { AppPreferences(androidContext()) }
+
     viewModel { TodayViewModel(get()) }
+    viewModel { HistoryViewModel(get(), get()) }
 }

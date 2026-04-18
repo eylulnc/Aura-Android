@@ -23,18 +23,12 @@ class TodayViewModel(private val repository: MoodRepository) : ViewModel() {
     val uiState: StateFlow<TodayUiState> = _uiState.asStateFlow()
 
     init {
-        loadToday()
-    }
-
-    private fun loadToday() {
         viewModelScope.launch {
-            val entry = repository.getToday()
-            _uiState.update {
-                it.copy(
-                    todayEntry = entry,
-                    pendingMoodId = entry?.mood,
-                    note = entry?.note ?: ""
-                )
+            repository.getTodayFlow().collect { entry ->
+                _uiState.update {
+                    if (it.isEditing) it.copy(todayEntry = entry)
+                    else it.copy(todayEntry = entry, pendingMoodId = entry?.mood, note = entry?.note ?: "")
+                }
             }
         }
     }
@@ -57,10 +51,7 @@ class TodayViewModel(private val repository: MoodRepository) : ViewModel() {
             } else {
                 repository.editMood(state.todayEntry, moodId, state.note)
             }
-            val updated = repository.getToday()
-            _uiState.update {
-                it.copy(todayEntry = updated, isEditing = false)
-            }
+            _uiState.update { it.copy(isEditing = false) }
         }
     }
 
