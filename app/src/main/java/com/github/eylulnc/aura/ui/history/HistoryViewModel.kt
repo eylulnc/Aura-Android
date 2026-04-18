@@ -45,7 +45,7 @@ data class HistoryUiState(
 
 class HistoryViewModel(
     private val repository: MoodRepository,
-    private val prefs: AppPreferences
+    prefs: AppPreferences
 ) : ViewModel() {
 
     val firstLaunchMonth: YearMonth = YearMonth.from(prefs.getFirstLaunchDate())
@@ -75,6 +75,10 @@ class HistoryViewModel(
 
     fun selectDay(day: Int) {
         _uiState.update { it.copy(selectedDay = if (it.selectedDay == day) null else day) }
+    }
+
+    fun goToToday() {
+        _uiState.update { it.copy(selectedMonth = YearMonth.now(), selectedDay = null) }
     }
 
     fun toggleSort() {

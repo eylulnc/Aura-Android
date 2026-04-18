@@ -97,6 +97,7 @@ fun HistoryScreen(viewModel: HistoryViewModel = koinViewModel()) {
                     earliestMonth = viewModel.firstLaunchMonth,
                     onPrev = viewModel::prevMonth,
                     onNext = viewModel::nextMonth,
+                    onGoToToday = viewModel::goToToday,
                     colors = colors
                 )
                 Spacer(Modifier.height(Spacing.l))
@@ -201,11 +202,13 @@ private fun MonthHeader(
     earliestMonth: YearMonth,
     onPrev: () -> Unit,
     onNext: () -> Unit,
+    onGoToToday: () -> Unit,
     colors: AuraColors
 ) {
     val label = month.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault()))
     val canGoPrev = month > earliestMonth
     val canGoNext = month < YearMonth.now()
+    val isCurrentMonth = month == YearMonth.now()
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -219,12 +222,23 @@ private fun MonthHeader(
                 tint = if (canGoPrev) colors.textPrimary else colors.border
             )
         }
-        Text(
-            text = label,
-            fontSize = FontSize.l,
-            fontWeight = FontWeight.SemiBold,
-            color = colors.textPrimary
-        )
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = label,
+                fontSize = FontSize.l,
+                fontWeight = FontWeight.SemiBold,
+                color = colors.textPrimary
+            )
+            if (!isCurrentMonth) {
+                Text(
+                    text = "Back to today",
+                    fontSize = FontSize.xs,
+                    color = colors.accent,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.clickable(onClick = onGoToToday)
+                )
+            }
+        }
         IconButton(onClick = onNext, enabled = canGoNext) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
