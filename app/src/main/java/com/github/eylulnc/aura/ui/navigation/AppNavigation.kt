@@ -21,6 +21,7 @@ import androidx.navigation.compose.rememberNavController
 import com.github.eylulnc.aura.R
 import com.github.eylulnc.aura.ui.history.HistoryScreen
 import com.github.eylulnc.aura.ui.settings.SettingsScreen
+import com.github.eylulnc.aura.ui.settings.SettingsViewModel
 import com.github.eylulnc.aura.ui.theme.auraColors
 import com.github.eylulnc.aura.ui.today.TodayScreen
 
@@ -33,7 +34,7 @@ sealed class Screen(val route: String, val labelRes: Int, val icon: ImageVector)
 private val tabs = listOf(Screen.Today, Screen.History, Screen.Settings)
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(settingsViewModel: SettingsViewModel) {
     val navController = rememberNavController()
     val colors = auraColors
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -88,7 +89,7 @@ fun AppNavigation() {
         ) {
             composable(Screen.Today.route) { TodayScreen() }
             composable(Screen.History.route) { HistoryScreen() }
-            composable(Screen.Settings.route) { SettingsScreen() }
+            composable(Screen.Settings.route) { SettingsScreen(settingsViewModel) }
         }
     }
 }

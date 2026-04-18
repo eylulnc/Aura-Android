@@ -33,4 +33,5 @@
     <string name="settings_delete_confirm_action">Delete</string>
     <string name="settings_delete_cancel">Cancel</string>
     <string name="settings_version">Version %1$s</string>
+    <string name="settings_developer">by Eylül Naz Can</string>
 </resources>

@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
             }
             AuraTheme(darkTheme = darkTheme) {
-                AppNavigation()
+                AppNavigation(settingsViewModel)
             }
         }
     }

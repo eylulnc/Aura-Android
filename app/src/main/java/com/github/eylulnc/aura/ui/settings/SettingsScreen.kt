@@ -1,10 +1,11 @@
 package com.github.eylulnc.aura.ui.settings
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,6 +14,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import com.github.eylulnc.aura.R
 import com.github.eylulnc.aura.ui.theme.*
 import org.koin.androidx.compose.koinViewModel
@@ -32,40 +35,58 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinViewModel()) {
         modifier = Modifier
             .fillMaxSize()
             .background(colors.background)
-            .padding(horizontal = Spacing.l, vertical = Spacing.xl)
     ) {
-        Text(
-            text = stringResource(R.string.settings_title),
-            fontSize = FontSize.xl,
-            fontWeight = FontWeight.SemiBold,
-            color = colors.textPrimary
-        )
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = Spacing.l)
+                .padding(top = Spacing.xl),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xl)
+        ) {
+            SettingsGroup(label = stringResource(R.string.settings_section_appearance), colors = colors) {
+                ThemePicker(selected = themeMode, onSelect = viewModel::setThemeMode, colors = colors)
+            }
 
-        Spacer(Modifier.height(Spacing.xl))
+            SettingsGroup(label = stringResource(R.string.settings_section_data), colors = colors) {
+                Text(
+                    text = stringResource(R.string.settings_delete_all),
+                    fontSize = FontSize.m,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier
+                        .clickable { showDeleteDialog = true }
+                        .fillMaxWidth()
+                        .padding(vertical = Spacing.xs)
+                )
+            }
 
-        SettingsSectionLabel(stringResource(R.string.settings_section_appearance), colors)
-        Spacer(Modifier.height(Spacing.m))
-        ThemePicker(selected = themeMode, onSelect = viewModel::setThemeMode, colors = colors)
+            Spacer(Modifier.height(Spacing.s))
 
-        Spacer(Modifier.height(Spacing.xl))
-
-        SettingsSectionLabel(stringResource(R.string.settings_section_data), colors)
-        Spacer(Modifier.height(Spacing.m))
-        SettingsRow(
-            label = stringResource(R.string.settings_delete_all),
-            labelColor = MaterialTheme.colorScheme.error,
-            colors = colors,
-            onClick = { showDeleteDialog = true }
-        )
-
-        Spacer(Modifier.weight(1f))
-
-        Text(
-            text = stringResource(R.string.settings_version, versionName),
-            fontSize = FontSize.xs,
-            color = colors.textSecondary,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = Spacing.xl)
+            ) {
+                Text(
+                    text = stringResource(R.string.app_name).uppercase(),
+                    fontSize = FontSize.xs,
+                    color = colors.textSecondary,
+                    letterSpacing = TextUnit(1.5f, TextUnitType.Sp)
+                )
+                Text(
+                    text = stringResource(R.string.settings_version, versionName),
+                    fontSize = FontSize.xs,
+                    color = colors.textSecondary.copy(alpha = 0.7f)
+                )
+                Text(
+                    text = stringResource(R.string.settings_developer),
+                    fontSize = FontSize.xs,
+                    color = colors.textSecondary.copy(alpha = 0.5f)
+                )
+            }
+        }
     }
 
     if (showDeleteDialog) {
@@ -95,74 +116,60 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinViewModel()) {
 }
 
 @Composable
+private fun SettingsGroup(label: String, colors: AuraColors, content: @Composable ColumnScope.() -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+        Text(
+            text = label.uppercase(),
+            fontSize = FontSize.xs,
+            fontWeight = FontWeight.SemiBold,
+            color = colors.textSecondary,
+            letterSpacing = TextUnit(1.5f, TextUnitType.Sp),
+            modifier = Modifier.padding(horizontal = Spacing.s)
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(Spacing.radiusCard))
+                .background(colors.surface)
+                .padding(Spacing.l),
+            content = content
+        )
+    }
+}
+
+@Composable
 private fun ThemePicker(selected: ThemeMode, onSelect: (ThemeMode) -> Unit, colors: AuraColors) {
     val options = listOf(
-        ThemeMode.LIGHT to R.string.settings_theme_light,
         ThemeMode.SYSTEM to R.string.settings_theme_system,
+        ThemeMode.LIGHT to R.string.settings_theme_light,
         ThemeMode.DARK to R.string.settings_theme_dark,
     )
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(Spacing.radiusButton))
-            .border(Spacing.borderWidth, colors.border, RoundedCornerShape(Spacing.radiusButton))
+            .background(colors.textSecondary.copy(alpha = 0.12f))
+            .padding(Spacing.xs),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs)
     ) {
-        options.forEachIndexed { index, (mode, labelRes) ->
+        options.forEach { (mode, labelRes) ->
             val isSelected = selected == mode
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .weight(1f)
-                    .background(if (isSelected) colors.accent else colors.surface)
+                    .clip(RoundedCornerShape(Spacing.s))
+                    .background(if (isSelected) colors.background else androidx.compose.ui.graphics.Color.Transparent)
                     .clickable { onSelect(mode) }
-                    .padding(vertical = Spacing.m)
+                    .padding(vertical = Spacing.s)
             ) {
                 Text(
                     text = stringResource(labelRes),
                     fontSize = FontSize.s,
                     fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                    color = if (isSelected) colors.surface else colors.textSecondary
-                )
-            }
-            if (index < options.lastIndex) {
-                Box(
-                    modifier = Modifier
-                        .width(Spacing.borderWidth)
-                        .height(Spacing.xl + Spacing.m)
-                        .background(colors.border)
+                    color = if (isSelected) colors.textPrimary else colors.textSecondary
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun SettingsSectionLabel(label: String, colors: AuraColors) {
-    Text(
-        text = label.uppercase(),
-        fontSize = FontSize.xs,
-        fontWeight = FontWeight.Medium,
-        color = colors.textSecondary,
-        letterSpacing = androidx.compose.ui.unit.TextUnit(1.2f, androidx.compose.ui.unit.TextUnitType.Sp)
-    )
-}
-
-@Composable
-private fun SettingsRow(
-    label: String,
-    labelColor: androidx.compose.ui.graphics.Color,
-    colors: AuraColors,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(Spacing.radiusCard))
-            .background(colors.surface)
-            .border(Spacing.borderWidth, colors.border, RoundedCornerShape(Spacing.radiusCard))
-            .clickable(onClick = onClick)
-            .padding(horizontal = Spacing.l, vertical = Spacing.l)
-    ) {
-        Text(text = label, fontSize = FontSize.m, color = labelColor)
     }
 }
