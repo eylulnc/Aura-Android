@@ -1,6 +1,7 @@
 package com.github.eylulnc.aura.ui.components
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -16,8 +17,10 @@ fun MoodSvgImage(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val svg = remember(moodFace.svgRes) {
-        SVG.getFromResource(context, moodFace.svgRes)
+    val isDark = isSystemInDarkTheme()
+    val resId = if (isDark) moodFace.darkSvgRes else moodFace.svgRes
+    val svg = remember(resId) {
+        SVG.getFromResource(context, resId)
     }
 
     Canvas(modifier = modifier) {

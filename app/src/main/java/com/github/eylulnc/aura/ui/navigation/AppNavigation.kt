@@ -31,7 +31,7 @@ import com.github.eylulnc.aura.ui.settings.DataPrivacyScreen
 import com.github.eylulnc.aura.ui.settings.SettingsScreen
 import com.github.eylulnc.aura.ui.settings.SettingsViewModel
 import com.github.eylulnc.aura.ui.theme.auraColors
-import com.github.eylulnc.aura.ui.today.TodayScreen
+import com.github.eylulnc.aura.ui.home.TodayScreen
 
 sealed class Screen(val route: String, val labelRes: Int, val icon: ImageVector) {
     data object Today : Screen("today", R.string.tab_today, Icons.Default.Home)

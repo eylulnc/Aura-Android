@@ -3,6 +3,7 @@
 
     <!-- Today screen -->
     <string name="today_prompt_empty">How are you feeling?</string>
+    <string name="today_tap_to_log">Tap to log today\'s mood</string>
     <string name="today_prompt_logged">You\'re feeling</string>
     <string name="today_note_placeholder">Add a note… (optional)</string>
     <string name="today_note_label">Your note</string>
@@ -11,8 +12,22 @@
     <string name="today_action_edit">Edit</string>
     <string name="today_action_cancel">Cancel</string>
 
+    <!-- Today dashboard stats -->
+    <string name="today_stat_streak">Streak</string>
+    <string name="today_stat_streak_unit">days</string>
+    <string name="today_stat_days_logged">This month</string>
+    <string name="today_stat_days_unit">days logged</string>
+    <string name="today_stat_top_mood">Top mood</string>
+    <string name="today_stat_positive">Positive</string>
+    <string name="today_stat_positive_unit">this week</string>
+    <string name="today_trend_title">This week</string>
+    <string name="today_trend_zone_positive">Positive</string>
+    <string name="today_trend_zone_neutral">Neutral</string>
+    <string name="today_trend_zone_negative">Negative</string>
+    <string name="today_top_moods_title">Top moods this month</string>
+
     <!-- Navigation tabs -->
-    <string name="tab_today">Today</string>
+    <string name="tab_today">Home</string>
     <string name="tab_history">History</string>
     <string name="tab_settings">Settings</string>
 
