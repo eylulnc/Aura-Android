@@ -89,22 +89,26 @@ class MoodRepository(
             firestore.userEntries(userId).document(withUser.id).set(withUser.toMap()).await()
         }
 
-        // Pull remote entries not present locally
+        // Pull remote entries — skip if a newer local entry exists for the same date
         val localIds = localEntries.map { it.id }.toSet()
+        val localByDate = localEntries.associateBy { it.date }
         val remoteEntries = firestore.userEntries(userId).get().await()
         remoteEntries.forEach { doc ->
-            if (doc.id !in localIds) {
-                val entry = MoodEntry(
-                    id = doc.id,
-                    userId = doc.getString("userId"),
-                    date = doc.getString("date") ?: return@forEach,
-                    timestamp = doc.getLong("timestamp") ?: return@forEach,
-                    mood = doc.getLong("mood")?.toInt() ?: return@forEach,
-                    note = doc.getString("note"),
-                    syncedAt = doc.getLong("syncedAt")
-                )
-                dao.insert(entry)
-            }
+            if (doc.id in localIds) return@forEach
+            val date = doc.getString("date") ?: return@forEach
+            val remoteTimestamp = doc.getLong("timestamp") ?: return@forEach
+            val localForDate = localByDate[date]
+            if (localForDate != null && localForDate.timestamp >= remoteTimestamp) return@forEach
+            val entry = MoodEntry(
+                id = doc.id,
+                userId = doc.getString("userId"),
+                date = date,
+                timestamp = remoteTimestamp,
+                mood = doc.getLong("mood")?.toInt() ?: return@forEach,
+                note = doc.getString("note"),
+                syncedAt = doc.getLong("syncedAt")
+            )
+            dao.insert(entry)
         }
     }
 
