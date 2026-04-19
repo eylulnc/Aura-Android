@@ -133,5 +133,3 @@ constants/          # MoodFace definitions, MOOD_SLIDER_ORDER, MOOD_VALENCE
 ```
 
 <br>
-
-<sub>by Eylül Naz Can</sub>
