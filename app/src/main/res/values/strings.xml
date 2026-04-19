@@ -27,7 +27,7 @@
     <string name="today_top_moods_title">Top moods this month</string>
 
     <!-- Navigation tabs -->
-    <string name="tab_today">Today</string>
+    <string name="tab_today">Home</string>
     <string name="tab_history">History</string>
     <string name="tab_settings">Settings</string>
 
