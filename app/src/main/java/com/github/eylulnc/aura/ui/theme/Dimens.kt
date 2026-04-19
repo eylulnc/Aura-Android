@@ -21,9 +21,11 @@ object Spacing {
     val selectionBorderWidth = 2.dp
 
     // Mood face sizes
-    val moodFaceSize = 52.dp   // SVG inside picker cell
-    val moodFaceWrapperSize = 56.dp   // tap target / selection ring
-    val moodFaceLargeSize = 96.dp   // logged state display
+    val moodFaceSize = 52.dp
+    val moodFaceWrapperSize = 56.dp
+    val moodFaceSmallSize = 32.dp
+    val moodFaceMediumSize = 48.dp
+    val moodFaceLargeSize = 96.dp
 
     // Component sizes
     val noteInputMinHeight = 80.dp
