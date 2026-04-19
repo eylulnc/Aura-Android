@@ -1,6 +1,7 @@
 # Aura — Mood Journal
 
-A minimal, thoughtful mood tracking app for Android. Log how you're feeling each day, track patterns over time, and understand your emotional trends at a glance.
+A minimal, thoughtful mood tracking app for Android. Log how you're feeling each day, track patterns
+over time, and understand your emotional trends at a glance.
 
 <br>
 
@@ -27,18 +28,21 @@ A minimal, thoughtful mood tracking app for Android. Log how you're feeling each
 
 <table>
   <tr>
+    <td align="center"><b>Login</b></td>
+    <td align="center"><b>Home</b></td>
     <td align="center"><b>Home (logged)</b></td>
     <td align="center"><b>History</b></td>
-    <td align="center"><b>History (past month)</b></td>
     <td align="center"><b>Settings</b></td>
   </tr>
   <tr>
+    <td><img width="200" src="docs/screenshots/login-dark.png" /></td>
+    <td><img width="200" src="docs/screenshots/home_dark_not_logged_in.png" /></td>
     <td><img width="200" src="docs/screenshots/dark/home_logged.png" /></td>
     <td><img width="200" src="docs/screenshots/dark/history.png" /></td>
-    <td><img width="200" src="docs/screenshots/dark/history_prev.png" /></td>
     <td><img width="200" src="docs/screenshots/dark/settings.png" /></td>
   </tr>
 </table>
+
 
 <br>
 
@@ -71,11 +75,15 @@ A minimal, thoughtful mood tracking app for Android. Log how you're feeling each
 
 ## Features
 
-- **Daily mood logging** — tap the home card to log or edit today's mood via a bottom sheet with a 13-step slider
+- **Daily mood logging** — tap the home card to log or edit today's mood via a bottom sheet with a
+  13-step slider
 - **Mood note** — attach a short note (up to 150 characters) to any entry
-- **Home dashboard** — streak, days logged this month, top mood, weekly positive %, 7-day trend chart, and top moods breakdown
-- **Mood trend chart** — valence-based Y axis with positive/neutral/negative zone bands, gradient fill, and mood-colored dots
-- **History calendar** — colour-coded monthly calendar with a scrollable entry list; navigate to any past month
+- **Home dashboard** — streak, days logged this month, top mood, weekly positive %, 7-day trend
+  chart, and top moods breakdown
+- **Mood trend chart** — valence-based Y axis with positive/neutral/negative zone bands, gradient
+  fill, and mood-colored dots
+- **History calendar** — colour-coded monthly calendar with a scrollable entry list; navigate to any
+  past month
 - **Light & dark mode** — full theme support with dedicated mood icon variants for each theme
 - **Google sign-in** — optional account with Firestore sync; guest data is preserved on sign-in
 - **Offline-first** — full guest mode with no account required; local data is preserved on sign-in
@@ -84,16 +92,16 @@ A minimal, thoughtful mood tracking app for Android. Log how you're feeling each
 
 ## Tech Stack
 
-| Layer | Library |
-|---|---|
-| UI | Jetpack Compose + Material 3 |
-| Navigation | Compose Navigation |
-| State | ViewModel + StateFlow |
-| Local DB | Room |
-| Auth | Firebase Auth (Google) |
-| Sync | Cloud Firestore |
-| DI | Koin |
-| Min SDK | 30 (Android 11) |
+| Layer      | Library                      |
+|------------|------------------------------|
+| UI         | Jetpack Compose + Material 3 |
+| Navigation | Compose Navigation           |
+| State      | ViewModel + StateFlow        |
+| Local DB   | Room                         |
+| Auth       | Firebase Auth (Google)       |
+| Sync       | Cloud Firestore              |
+| DI         | Koin                         |
+| Min SDK    | 30 (Android 11)              |
 
 <br>
 
