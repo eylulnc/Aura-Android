@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 enum class ThemeMode { LIGHT, DARK, SYSTEM }
@@ -69,8 +70,9 @@ class SettingsViewModel(
                 repository.deleteAllLocal()
                 authRepository.signOut()
                 prefs.resetOnboarding()
+                delay(400)
                 onComplete()
-            } finally {
+            } catch (e: Exception) {
                 _isSyncing.value = false
             }
         }
@@ -99,7 +101,8 @@ class SettingsViewModel(
                 val result = authRepository.deleteAccount(activityContext)
                 if (result.isSuccess) {
                     prefs.resetOnboarding()
-                    onComplete() // isSyncing stays true — LoginScreen clears it on entry
+                    delay(400)
+                    onComplete()
                 } else {
                     _isSyncing.value = false
                     _signInError.value = result.exceptionOrNull()?.message

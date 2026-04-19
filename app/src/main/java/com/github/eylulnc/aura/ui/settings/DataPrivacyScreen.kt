@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -133,7 +134,10 @@ fun DataPrivacyScreen(
             confirmButton = {
                 TextButton(onClick = {
                     showDeleteAccountDialog = false
-                    viewModel.deleteAccount(context) { onAccountDeleted() }
+                    viewModel.deleteAccount(context) {
+                        Toast.makeText(context, "Account deleted successfully", Toast.LENGTH_SHORT).show()
+                        onAccountDeleted()
+                    }
                 }) {
                     Text(
                         stringResource(R.string.data_privacy_delete_account_confirm_action),

@@ -21,6 +21,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import com.github.eylulnc.aura.R
 import com.github.eylulnc.aura.ui.components.FullScreenLoading
 import com.github.eylulnc.aura.ui.history.HistoryScreen
@@ -46,32 +48,41 @@ private const val ROUTE_DATA_PRIVACY = "data_privacy"
 @Composable
 fun AppNavigation(settingsViewModel: SettingsViewModel, showOnboarding: Boolean) {
     val rootNavController = rememberNavController()
+    val isSyncing by settingsViewModel.isSyncing.collectAsState()
 
-    NavHost(
-        navController = rootNavController,
-        startDestination = if (showOnboarding) ROUTE_ONBOARDING else ROUTE_MAIN
-    ) {
-        composable(ROUTE_ONBOARDING) {
-            LoginScreen(
-                viewModel = settingsViewModel,
-                onComplete = {
-                    rootNavController.navigate(ROUTE_MAIN) {
-                        popUpTo(ROUTE_ONBOARDING) { inclusive = true }
+    Box(modifier = Modifier.fillMaxSize()) {
+        NavHost(
+            navController = rootNavController,
+            startDestination = if (showOnboarding) ROUTE_ONBOARDING else ROUTE_MAIN,
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None }
+        ) {
+            composable(ROUTE_ONBOARDING) {
+                LoginScreen(
+                    viewModel = settingsViewModel,
+                    onComplete = {
+                        rootNavController.navigate(ROUTE_MAIN) {
+                            popUpTo(ROUTE_ONBOARDING) { inclusive = true }
+                        }
+                    }
+                )
+            }
+            composable(ROUTE_MAIN) {
+                val navigateToOnboarding = {
+                    rootNavController.navigate(ROUTE_ONBOARDING) {
+                        popUpTo(ROUTE_MAIN) { inclusive = true }
                     }
                 }
-            )
-        }
-        composable(ROUTE_MAIN) {
-            val navigateToOnboarding = {
-                rootNavController.navigate(ROUTE_ONBOARDING) {
-                    popUpTo(ROUTE_MAIN) { inclusive = true }
-                }
+                MainScaffold(
+                    settingsViewModel = settingsViewModel,
+                    onSignedOut = navigateToOnboarding,
+                    onAccountDeleted = navigateToOnboarding
+                )
             }
-            MainScaffold(
-                settingsViewModel = settingsViewModel,
-                onSignedOut = navigateToOnboarding,
-                onAccountDeleted = navigateToOnboarding
-            )
+        }
+
+        if (isSyncing) {
+            FullScreenLoading(message = stringResource(R.string.loading_working))
         }
     }
 }
@@ -86,12 +97,10 @@ private fun MainScaffold(
     val colors = auraColors
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-    val isSyncing by settingsViewModel.isSyncing.collectAsState()
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Scaffold(
-            containerColor = colors.background,
-            bottomBar = {
+    Scaffold(
+        containerColor = colors.background,
+        bottomBar = {
             NavigationBar(
                 containerColor = colors.surface,
                 tonalElevation = 0.dp
@@ -152,10 +161,6 @@ private fun MainScaffold(
                     onBack = { navController.popBackStack() }
                 )
             }
-        }
-    }
-        if (isSyncing) {
-            FullScreenLoading(message = stringResource(R.string.loading_working))
         }
     }
 }
