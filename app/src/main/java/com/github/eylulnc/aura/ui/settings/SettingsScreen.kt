@@ -28,6 +28,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = koinViewModel(),
+    onSignedOut: () -> Unit = {},
     onNavigateToDataPrivacy: () -> Unit = {}
 ) {
     val colors = auraColors
@@ -98,7 +99,7 @@ fun SettingsScreen(
                         fontSize = FontSize.m,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier
-                            .clickable { viewModel.signOut() }
+                            .clickable { viewModel.signOut(onSignedOut) }
                             .fillMaxWidth()
                             .padding(vertical = Spacing.xs)
                     )

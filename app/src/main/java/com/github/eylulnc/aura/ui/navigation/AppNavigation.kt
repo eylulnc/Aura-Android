@@ -1,5 +1,7 @@
 package com.github.eylulnc.aura.ui.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
@@ -7,6 +9,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -19,6 +22,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.github.eylulnc.aura.R
+import com.github.eylulnc.aura.ui.components.FullScreenLoading
 import com.github.eylulnc.aura.ui.history.HistoryScreen
 import com.github.eylulnc.aura.ui.onboarding.LoginScreen
 import com.github.eylulnc.aura.ui.settings.DataPrivacyScreen
@@ -58,28 +62,36 @@ fun AppNavigation(settingsViewModel: SettingsViewModel, showOnboarding: Boolean)
             )
         }
         composable(ROUTE_MAIN) {
+            val navigateToOnboarding = {
+                rootNavController.navigate(ROUTE_ONBOARDING) {
+                    popUpTo(ROUTE_MAIN) { inclusive = true }
+                }
+            }
             MainScaffold(
                 settingsViewModel = settingsViewModel,
-                onAccountDeleted = {
-                    rootNavController.navigate(ROUTE_ONBOARDING) {
-                        popUpTo(ROUTE_MAIN) { inclusive = true }
-                    }
-                }
+                onSignedOut = navigateToOnboarding,
+                onAccountDeleted = navigateToOnboarding
             )
         }
     }
 }
 
 @Composable
-private fun MainScaffold(settingsViewModel: SettingsViewModel, onAccountDeleted: () -> Unit) {
+private fun MainScaffold(
+    settingsViewModel: SettingsViewModel,
+    onSignedOut: () -> Unit,
+    onAccountDeleted: () -> Unit
+) {
     val navController = rememberNavController()
     val colors = auraColors
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+    val isSyncing by settingsViewModel.isSyncing.collectAsState()
 
-    Scaffold(
-        containerColor = colors.background,
-        bottomBar = {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            containerColor = colors.background,
+            bottomBar = {
             NavigationBar(
                 containerColor = colors.surface,
                 tonalElevation = 0.dp
@@ -129,6 +141,7 @@ private fun MainScaffold(settingsViewModel: SettingsViewModel, onAccountDeleted:
             composable(Screen.Settings.route) {
                 SettingsScreen(
                     viewModel = settingsViewModel,
+                    onSignedOut = onSignedOut,
                     onNavigateToDataPrivacy = { navController.navigate(ROUTE_DATA_PRIVACY) }
                 )
             }
@@ -139,6 +152,10 @@ private fun MainScaffold(settingsViewModel: SettingsViewModel, onAccountDeleted:
                     onBack = { navController.popBackStack() }
                 )
             }
+        }
+    }
+        if (isSyncing) {
+            FullScreenLoading(message = stringResource(R.string.loading_working))
         }
     }
 }

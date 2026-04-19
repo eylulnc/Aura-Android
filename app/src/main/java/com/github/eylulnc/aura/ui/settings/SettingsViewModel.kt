@@ -62,8 +62,18 @@ class SettingsViewModel(
 
     fun completeOnboarding() = prefs.setOnboardingCompleted()
 
-    fun signOut() {
-        authRepository.signOut()
+    fun signOut(onComplete: () -> Unit) {
+        viewModelScope.launch {
+            _isSyncing.value = true
+            try {
+                repository.deleteAll()
+                authRepository.signOut()
+                prefs.resetOnboarding()
+                onComplete()
+            } finally {
+                _isSyncing.value = false
+            }
+        }
     }
 
     fun clearSignInError() {

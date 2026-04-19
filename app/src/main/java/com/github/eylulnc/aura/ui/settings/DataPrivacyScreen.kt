@@ -28,7 +28,6 @@ fun DataPrivacyScreen(
     val colors = auraColors
     val currentUser by viewModel.currentUser.collectAsState()
     val signInError by viewModel.signInError.collectAsState()
-    val isSyncing by viewModel.isSyncing.collectAsState()
     var showDeleteDataDialog by remember { mutableStateOf(false) }
     var showDeleteAccountDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -72,7 +71,6 @@ fun DataPrivacyScreen(
                     title = stringResource(R.string.data_privacy_delete_account_title),
                     description = stringResource(R.string.data_privacy_delete_account_description),
                     buttonLabel = stringResource(R.string.data_privacy_delete_account_button),
-                    isLoading = isSyncing,
                     colors = colors,
                     onClick = { showDeleteAccountDialog = true }
                 )
@@ -81,7 +79,6 @@ fun DataPrivacyScreen(
                     title = stringResource(R.string.data_privacy_delete_data_title),
                     description = stringResource(R.string.data_privacy_delete_data_description),
                     buttonLabel = stringResource(R.string.data_privacy_delete_data_button),
-                    isLoading = false,
                     colors = colors,
                     onClick = { showDeleteDataDialog = true }
                 )
@@ -159,7 +156,6 @@ private fun DestructiveCard(
     title: String,
     description: String,
     buttonLabel: String,
-    isLoading: Boolean,
     colors: AuraColors,
     onClick: () -> Unit
 ) {
@@ -185,23 +181,14 @@ private fun DestructiveCard(
         Spacer(Modifier.height(Spacing.xs))
         OutlinedButton(
             onClick = onClick,
-            enabled = !isLoading,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(Spacing.radiusButton),
             border = androidx.compose.foundation.BorderStroke(
                 width = 1.dp,
-                color = MaterialTheme.colorScheme.error.copy(alpha = if (isLoading) 0.4f else 1f)
+                color = MaterialTheme.colorScheme.error
             )
         ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(Spacing.m),
-                    strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.error
-                )
-            } else {
-                Text(buttonLabel, color = MaterialTheme.colorScheme.error)
-            }
+            Text(buttonLabel, color = MaterialTheme.colorScheme.error)
         }
     }
 }
