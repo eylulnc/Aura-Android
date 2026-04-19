@@ -60,7 +60,9 @@ class TodayViewModel(private val repository: MoodRepository) : ViewModel() {
 
     private fun computeStreak(entries: List<MoodEntry>): Int {
         val dateSet = entries.map { it.date }.toSet()
-        var date = LocalDate.now()
+        val today = LocalDate.now()
+        // If today isn't logged yet, preserve streak — start counting from yesterday
+        var date = if (dateSet.contains(today.toString())) today else today.minusDays(1)
         var count = 0
         while (dateSet.contains(date.toString())) {
             count++
