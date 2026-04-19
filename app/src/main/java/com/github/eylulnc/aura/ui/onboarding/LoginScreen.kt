@@ -44,8 +44,12 @@ fun LoginScreen(
     val signInError by viewModel.signInError.collectAsState()
     val isSyncing by viewModel.isSyncing.collectAsState()
 
-    LaunchedEffect(currentUser, isSyncing) {
-        if (currentUser != null && !isSyncing) {
+    LaunchedEffect(Unit) {
+        viewModel.clearSyncing()
+    }
+
+    LaunchedEffect(currentUser) {
+        if (currentUser != null) {
             viewModel.completeOnboarding()
             onComplete()
         }

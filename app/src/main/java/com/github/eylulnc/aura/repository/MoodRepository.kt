@@ -66,6 +66,10 @@ class MoodRepository(
         firestore.userEntries(userId).document(entry.id).delete().await()
     }
 
+    suspend fun deleteAllLocal() {
+        dao.deleteAll()
+    }
+
     suspend fun deleteAll() {
         dao.deleteAll()
         val userId = authRepository.currentUser?.uid ?: return

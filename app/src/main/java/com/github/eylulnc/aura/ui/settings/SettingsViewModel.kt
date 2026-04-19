@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 enum class ThemeMode { LIGHT, DARK, SYSTEM }
@@ -62,8 +63,19 @@ class SettingsViewModel(
 
     fun completeOnboarding() = prefs.setOnboardingCompleted()
 
-    fun signOut() {
-        authRepository.signOut()
+    fun signOut(onComplete: () -> Unit) {
+        viewModelScope.launch {
+            _isSyncing.value = true
+            try {
+                repository.deleteAllLocal()
+                authRepository.signOut()
+                prefs.resetOnboarding()
+                delay(400)
+                onComplete()
+            } catch (e: Exception) {
+                _isSyncing.value = false
+            }
+        }
     }
 
     fun clearSignInError() {
@@ -74,6 +86,31 @@ class SettingsViewModel(
         viewModelScope.launch {
             repository.deleteAll()
             onComplete()
+        }
+    }
+
+    fun clearSyncing() {
+        _isSyncing.value = false
+    }
+
+    fun deleteAccount(activityContext: Context, onComplete: () -> Unit) {
+        viewModelScope.launch {
+            _isSyncing.value = true
+            try {
+                repository.deleteAll()
+                val result = authRepository.deleteAccount(activityContext)
+                if (result.isSuccess) {
+                    prefs.resetOnboarding()
+                    delay(400)
+                    onComplete()
+                } else {
+                    _isSyncing.value = false
+                    _signInError.value = result.exceptionOrNull()?.message
+                }
+            } catch (e: Exception) {
+                _isSyncing.value = false
+                _signInError.value = e.message
+            }
         }
     }
 

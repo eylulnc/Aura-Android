@@ -36,6 +36,8 @@ class AppPreferences(context: Context) {
 
     fun setOnboardingCompleted() = prefs.edit { putBoolean(KEY_ONBOARDING_DONE, true) }
 
+    fun resetOnboarding() = prefs.edit { remove(KEY_ONBOARDING_DONE) }
+
     companion object {
         private const val KEY_FIRST_LAUNCH = "first_launch_date"
         private const val KEY_THEME = "theme_mode"
