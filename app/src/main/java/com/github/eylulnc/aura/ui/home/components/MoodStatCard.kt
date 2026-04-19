@@ -39,12 +39,12 @@ fun MoodStatCard(
             .padding(Spacing.l),
         verticalArrangement = Arrangement.spacedBy(Spacing.xs)
     ) {
-        Text(text = label, fontSize = FontSize.xs, color = colors.textSecondary)
+        Text(text = label, fontSize = FontSize.s, color = colors.textSecondary)
         Spacer(Modifier.height(Spacing.s))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            MoodSvgImage(face, Modifier.size(Spacing.moodFaceSmallSize))
-            Spacer(Modifier.width(Spacing.xs))
-            Text(text = face.label, fontSize = FontSize.s, fontWeight = FontWeight.SemiBold, color = moodColor)
+            MoodSvgImage(face, Modifier.size(Spacing.moodFaceMediumSize))
+            Spacer(Modifier.width(Spacing.s))
+            Text(text = face.label, fontSize = FontSize.m, fontWeight = FontWeight.SemiBold, color = moodColor)
         }
     }
 }

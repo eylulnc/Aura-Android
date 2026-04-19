@@ -35,13 +35,13 @@ fun TextStatCard(
             .padding(Spacing.l),
         verticalArrangement = Arrangement.spacedBy(Spacing.xs)
     ) {
-        Text(text = label, fontSize = FontSize.xs, color = colors.textSecondary)
+        Text(text = label, fontSize = FontSize.s, color = colors.textSecondary)
         Spacer(Modifier.height(Spacing.s))
         Text(text = value, fontSize = FontSize.xl, fontWeight = FontWeight.Bold, color = valueColor)
         if (unit != null) {
-            Text(text = unit, fontSize = FontSize.xs, color = colors.textSecondary)
+            Text(text = unit, fontSize = FontSize.s, color = colors.textSecondary)
         } else {
-            Spacer(Modifier.height(FontSize.xs.value.dp))
+            Spacer(Modifier.height(FontSize.s.value.dp))
         }
     }
 }
