@@ -66,7 +66,7 @@ class SettingsViewModel(
         viewModelScope.launch {
             _isSyncing.value = true
             try {
-                repository.deleteAll()
+                repository.deleteAllLocal()
                 authRepository.signOut()
                 prefs.resetOnboarding()
                 onComplete()
@@ -87,6 +87,10 @@ class SettingsViewModel(
         }
     }
 
+    fun clearSyncing() {
+        _isSyncing.value = false
+    }
+
     fun deleteAccount(activityContext: Context, onComplete: () -> Unit) {
         viewModelScope.launch {
             _isSyncing.value = true
@@ -95,12 +99,14 @@ class SettingsViewModel(
                 val result = authRepository.deleteAccount(activityContext)
                 if (result.isSuccess) {
                     prefs.resetOnboarding()
-                    onComplete()
+                    onComplete() // isSyncing stays true — LoginScreen clears it on entry
                 } else {
+                    _isSyncing.value = false
                     _signInError.value = result.exceptionOrNull()?.message
                 }
-            } finally {
+            } catch (e: Exception) {
                 _isSyncing.value = false
+                _signInError.value = e.message
             }
         }
     }
