@@ -11,13 +11,15 @@ over time, and understand your emotional trends at a glance.
 
 <table>
   <tr>
+    <td align="center"><b>Login</b></td>
     <td align="center"><b>Home</b></td>
     <td align="center"><b>Home (logged)</b></td>
     <td align="center"><b>History</b></td>
     <td align="center"><b>Settings</b></td>
   </tr>
   <tr>
-    <td><img width="200" src="docs/screenshots/light/home_empty.png" /></td>
+    <td><img width="200" src="docs/screenshots/login-light.png" /></td>
+    <td><img width="200" src="docs/screenshots/home_light_not_logged_in.png" /></td>
     <td><img width="200" src="docs/screenshots/light/home_logged.png" /></td>
     <td><img width="200" src="docs/screenshots/light/history.png" /></td>
     <td><img width="200" src="docs/screenshots/light/settings.png" /></td>
