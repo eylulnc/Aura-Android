@@ -77,6 +77,24 @@ class SettingsViewModel(
         }
     }
 
+    fun deleteAccount(activityContext: Context, onComplete: () -> Unit) {
+        viewModelScope.launch {
+            _isSyncing.value = true
+            try {
+                repository.deleteAll()
+                val result = authRepository.deleteAccount(activityContext)
+                if (result.isSuccess) {
+                    prefs.resetOnboarding()
+                    onComplete()
+                } else {
+                    _signInError.value = result.exceptionOrNull()?.message
+                }
+            } finally {
+                _isSyncing.value = false
+            }
+        }
+    }
+
     fun seedDemoData() {
         viewModelScope.launch { repository.seedDemoData() }
     }

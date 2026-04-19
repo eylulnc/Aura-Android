@@ -8,6 +8,7 @@ import com.github.eylulnc.aura.BuildConfig
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.channels.awaitClose
@@ -44,6 +45,25 @@ class AuthRepository {
                 ?: return Result.failure(Exception("Sign in failed"))
             Result.success(user)
         } catch (e: GetCredentialException) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deleteAccount(activityContext: Context): Result<Unit> {
+        val user = auth.currentUser ?: return Result.failure(Exception("Not signed in"))
+        return try {
+            user.delete().await()
+            Result.success(Unit)
+        } catch (e: FirebaseAuthRecentLoginRequiredException) {
+            val reAuthResult = signInWithGoogle(activityContext)
+            if (reAuthResult.isFailure) return Result.failure(reAuthResult.exceptionOrNull()!!)
+            try {
+                auth.currentUser?.delete()?.await()
+                Result.success(Unit)
+            } catch (e2: Exception) {
+                Result.failure(e2)
+            }
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }

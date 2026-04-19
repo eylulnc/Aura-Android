@@ -21,6 +21,7 @@ import androidx.navigation.compose.rememberNavController
 import com.github.eylulnc.aura.R
 import com.github.eylulnc.aura.ui.history.HistoryScreen
 import com.github.eylulnc.aura.ui.onboarding.LoginScreen
+import com.github.eylulnc.aura.ui.settings.DataPrivacyScreen
 import com.github.eylulnc.aura.ui.settings.SettingsScreen
 import com.github.eylulnc.aura.ui.settings.SettingsViewModel
 import com.github.eylulnc.aura.ui.theme.auraColors
@@ -36,6 +37,7 @@ private val tabs = listOf(Screen.Today, Screen.History, Screen.Settings)
 
 private const val ROUTE_ONBOARDING = "onboarding"
 private const val ROUTE_MAIN = "main"
+private const val ROUTE_DATA_PRIVACY = "data_privacy"
 
 @Composable
 fun AppNavigation(settingsViewModel: SettingsViewModel, showOnboarding: Boolean) {
@@ -56,13 +58,20 @@ fun AppNavigation(settingsViewModel: SettingsViewModel, showOnboarding: Boolean)
             )
         }
         composable(ROUTE_MAIN) {
-            MainScaffold(settingsViewModel)
+            MainScaffold(
+                settingsViewModel = settingsViewModel,
+                onAccountDeleted = {
+                    rootNavController.navigate(ROUTE_ONBOARDING) {
+                        popUpTo(ROUTE_MAIN) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }
 
 @Composable
-private fun MainScaffold(settingsViewModel: SettingsViewModel) {
+private fun MainScaffold(settingsViewModel: SettingsViewModel, onAccountDeleted: () -> Unit) {
     val navController = rememberNavController()
     val colors = auraColors
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -117,7 +126,19 @@ private fun MainScaffold(settingsViewModel: SettingsViewModel) {
         ) {
             composable(Screen.Today.route) { TodayScreen() }
             composable(Screen.History.route) { HistoryScreen() }
-            composable(Screen.Settings.route) { SettingsScreen(settingsViewModel) }
+            composable(Screen.Settings.route) {
+                SettingsScreen(
+                    viewModel = settingsViewModel,
+                    onNavigateToDataPrivacy = { navController.navigate(ROUTE_DATA_PRIVACY) }
+                )
+            }
+            composable(ROUTE_DATA_PRIVACY) {
+                DataPrivacyScreen(
+                    viewModel = settingsViewModel,
+                    onAccountDeleted = onAccountDeleted,
+                    onBack = { navController.popBackStack() }
+                )
+            }
         }
     }
 }

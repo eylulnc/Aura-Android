@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,12 +26,14 @@ import com.github.eylulnc.aura.ui.theme.*
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel = koinViewModel()) {
+fun SettingsScreen(
+    viewModel: SettingsViewModel = koinViewModel(),
+    onNavigateToDataPrivacy: () -> Unit = {}
+) {
     val colors = auraColors
     val themeMode by viewModel.themeMode.collectAsState()
     val currentUser by viewModel.currentUser.collectAsState()
     val signInError by viewModel.signInError.collectAsState()
-    var showDeleteDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     val versionName = remember {
@@ -115,6 +119,28 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinViewModel()) {
                 ThemePicker(selected = themeMode, onSelect = viewModel::setThemeMode, colors = colors)
             }
 
+            SettingsGroup(label = stringResource(R.string.settings_section_data_privacy), colors = colors) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onNavigateToDataPrivacy() }
+                        .padding(vertical = Spacing.xs),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.settings_section_data_privacy),
+                        fontSize = FontSize.m,
+                        color = colors.textPrimary
+                    )
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = colors.textSecondary
+                    )
+                }
+            }
+
             if (BuildConfig.DEBUG) {
                 SettingsGroup(label = "Dev", colors = colors) {
                     Text(
@@ -127,18 +153,6 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinViewModel()) {
                             .padding(vertical = Spacing.xs)
                     )
                 }
-            }
-
-            SettingsGroup(label = stringResource(R.string.settings_section_data), colors = colors) {
-                Text(
-                    text = stringResource(R.string.settings_delete_all),
-                    fontSize = FontSize.m,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier
-                        .clickable { showDeleteDialog = true }
-                        .fillMaxWidth()
-                        .padding(vertical = Spacing.xs)
-                )
             }
 
             Spacer(Modifier.height(Spacing.s))
@@ -183,35 +197,10 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinViewModel()) {
             containerColor = colors.surface
         )
     }
-
-    if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text(stringResource(R.string.settings_delete_confirm_title)) },
-            text = { Text(stringResource(R.string.settings_delete_confirm_body)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    showDeleteDialog = false
-                    viewModel.deleteAllData {}
-                }) {
-                    Text(
-                        stringResource(R.string.settings_delete_confirm_action),
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text(stringResource(R.string.settings_delete_cancel))
-                }
-            },
-            containerColor = colors.surface
-        )
-    }
 }
 
 @Composable
-private fun SettingsGroup(label: String, colors: AuraColors, content: @Composable ColumnScope.() -> Unit) {
+internal fun SettingsGroup(label: String, colors: AuraColors, content: @Composable ColumnScope.() -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
         Text(
             text = label.uppercase(),

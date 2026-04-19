@@ -38,12 +38,22 @@
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_system">System</string>
     <string name="settings_theme_dark">Dark</string>
-    <string name="settings_section_data">Data</string>
-    <string name="settings_delete_all">Delete all data</string>
-    <string name="settings_delete_confirm_title">Delete all data?</string>
-    <string name="settings_delete_confirm_body">This will permanently delete all your mood entries. This cannot be undone.</string>
-    <string name="settings_delete_confirm_action">Delete</string>
+    <string name="settings_section_data_privacy">Data &amp; Privacy</string>
     <string name="settings_delete_cancel">Cancel</string>
+
+    <!-- Data &amp; Privacy screen -->
+    <string name="data_privacy_delete_data_title">Delete all data</string>
+    <string name="data_privacy_delete_data_description">Removes all mood entries from this device. Your account stays active and you can sign back in at any time.</string>
+    <string name="data_privacy_delete_data_button">Delete all data</string>
+    <string name="data_privacy_delete_data_confirm_title">Delete all data?</string>
+    <string name="data_privacy_delete_data_confirm_body">This will permanently delete all your mood entries from this device. This cannot be undone.</string>
+    <string name="data_privacy_delete_data_confirm_action">Delete</string>
+    <string name="data_privacy_delete_account_title">Delete account</string>
+    <string name="data_privacy_delete_account_description">Permanently deletes your account and all mood entries from every device. This cannot be undone.</string>
+    <string name="data_privacy_delete_account_button">Delete account</string>
+    <string name="data_privacy_delete_account_confirm_title">Delete account?</string>
+    <string name="data_privacy_delete_account_confirm_body">This will permanently delete your account and all your mood entries, both locally and from the cloud. This cannot be undone.</string>
+    <string name="data_privacy_delete_account_confirm_action">Delete account</string>
     <string name="settings_version">Version %1$s</string>
     <string name="settings_developer">by Eylül Naz Can</string>
 </resources>
