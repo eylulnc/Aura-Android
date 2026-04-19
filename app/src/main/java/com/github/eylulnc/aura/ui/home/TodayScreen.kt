@@ -216,9 +216,7 @@ private fun TodayCard(entry: MoodEntry?, colors: AuraColors, onTap: () -> Unit) 
                         Text(
                             text = entry.note,
                             fontSize = FontSize.xs,
-                            color = colors.textSecondary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            color = colors.textSecondary
                         )
                     }
                 }
@@ -226,7 +224,7 @@ private fun TodayCard(entry: MoodEntry?, colors: AuraColors, onTap: () -> Unit) 
             Icon(
                 Icons.Default.Edit,
                 contentDescription = stringResource(R.string.today_action_edit),
-                tint = colors.textSecondary
+                tint = colors.accent
             )
         }
     }

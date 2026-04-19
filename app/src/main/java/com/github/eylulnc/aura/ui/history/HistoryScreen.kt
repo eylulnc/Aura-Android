@@ -1,6 +1,8 @@
 package com.github.eylulnc.aura.ui.history
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -411,9 +413,7 @@ private fun EntryRow(
                 Text(
                     text = entry.note,
                     fontSize = FontSize.s,
-                    color = colors.textSecondary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    color = colors.textSecondary
                 )
             }
         }
@@ -526,7 +526,7 @@ private fun EntryEditSheet(
 
         OutlinedTextField(
             value = state.note,
-            onValueChange = onNoteChange,
+            onValueChange = { if (it.length <= 150) onNoteChange(it) },
             placeholder = {
                 Text(stringResource(R.string.today_note_placeholder), color = colors.textSecondary)
             },
@@ -541,7 +541,17 @@ private fun EntryEditSheet(
                 unfocusedTextColor = colors.textPrimary,
                 cursorColor = colors.accent
             ),
-            maxLines = 5
+            maxLines = 4,
+            supportingText = {
+                Text(
+                    text = "${state.note.length} / 150",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.End,
+                    color = if (state.note.length >= 150) MaterialTheme.colorScheme.error
+                            else colors.textSecondary,
+                    fontSize = FontSize.xs
+                )
+            }
         )
 
         Spacer(Modifier.height(Spacing.l))

@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.core.graphics.toColorInt
@@ -30,6 +31,7 @@ fun LogMoodSheet(
         ?.let { id -> MOOD_SLIDER_ORDER.indexOfFirst { it.id == id }.takeIf { it >= 0 } }
         ?: 6
 
+    val noteMaxLength = 150
     var sliderIndex by remember { mutableIntStateOf(initialIndex) }
     var note by remember { mutableStateOf(initialNote) }
     val selectedMood = MOOD_SLIDER_ORDER[sliderIndex]
@@ -85,7 +87,7 @@ fun LogMoodSheet(
 
             OutlinedTextField(
                 value = note,
-                onValueChange = { note = it },
+                onValueChange = { if (it.length <= noteMaxLength) note = it },
                 placeholder = {
                     Text(
                         stringResource(R.string.today_note_placeholder),
@@ -103,7 +105,17 @@ fun LogMoodSheet(
                     unfocusedTextColor = colors.textPrimary,
                     cursorColor = colors.accent
                 ),
-                maxLines = 5
+                maxLines = 4,
+                supportingText = {
+                    Text(
+                        text = "${note.length} / $noteMaxLength",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.End,
+                        color = if (note.length >= noteMaxLength) MaterialTheme.colorScheme.error
+                                else colors.textSecondary,
+                        fontSize = FontSize.xs
+                    )
+                }
             )
 
             Spacer(Modifier.height(Spacing.l))
