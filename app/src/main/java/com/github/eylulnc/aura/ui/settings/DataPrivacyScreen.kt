@@ -15,6 +15,7 @@ import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.ui.unit.dp
 import com.github.eylulnc.aura.R
 import com.github.eylulnc.aura.ui.theme.*
@@ -54,7 +55,8 @@ fun DataPrivacyScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background),
+                windowInsets = WindowInsets(0.dp)
             )
         }
     ) { innerPadding ->
