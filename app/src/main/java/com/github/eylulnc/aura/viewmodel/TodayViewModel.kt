@@ -9,6 +9,7 @@ import com.github.eylulnc.aura.constants.getMoodFace
 import com.github.eylulnc.aura.model.MoodEntry
 import com.github.eylulnc.aura.repository.MoodRepository
 import com.github.eylulnc.aura.widget.AuraMoodWidgetReceiver
+import com.github.eylulnc.aura.widget.AuraStreakWidgetReceiver
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -61,6 +62,7 @@ class TodayViewModel(
             if (entry == null) repository.logMood(moodId, note)
             else repository.editMood(entry, moodId, note)
             AuraMoodWidgetReceiver.requestUpdate(getApplication())
+            AuraStreakWidgetReceiver.requestUpdate(getApplication())
         }
     }
 

@@ -37,6 +37,7 @@ import com.caverock.androidsvg.SVG
 import com.github.eylulnc.aura.MainActivity
 import com.github.eylulnc.aura.constants.MOODS
 import com.github.eylulnc.aura.constants.MoodFace
+import androidx.core.graphics.createBitmap
 
 class AuraMoodWidget : GlanceAppWidget() {
 
@@ -120,7 +121,7 @@ class AuraMoodWidget : GlanceAppWidget() {
 
 private fun renderMoodBitmap(context: Context, @RawRes svgRes: Int, sizePx: Int): Bitmap {
     val svg = SVG.getFromResource(context, svgRes)
-    val bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
+    val bitmap = createBitmap(sizePx, sizePx)
     val canvas = Canvas(bitmap)
     svg.documentWidth = sizePx.toFloat()
     svg.documentHeight = sizePx.toFloat()
