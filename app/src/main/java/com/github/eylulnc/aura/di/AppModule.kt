@@ -9,6 +9,7 @@ import com.github.eylulnc.aura.repository.MoodRepository
 import com.github.eylulnc.aura.ui.history.HistoryViewModel
 import com.github.eylulnc.aura.ui.settings.SettingsViewModel
 import com.github.eylulnc.aura.viewmodel.TodayViewModel
+import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -33,7 +34,7 @@ val appModule = module {
 
     single { NotificationScheduler(androidContext()) }
 
-    viewModel { TodayViewModel(get()) }
+    viewModel { TodayViewModel(androidApplication(), get()) }
     viewModel { HistoryViewModel(get()) }
     viewModel { SettingsViewModel(get(), get(), get(), get()) }
 }
