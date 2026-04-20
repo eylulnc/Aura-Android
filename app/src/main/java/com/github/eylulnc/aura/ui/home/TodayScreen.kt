@@ -84,9 +84,9 @@ fun TodayScreen(viewModel: TodayViewModel = koinViewModel()) {
         ) {
             TextStatCard(
                 label = stringResource(R.string.today_stat_streak),
-                value = if (state.streak > 0) state.streak.toString() else "—",
-                unit = if (state.streak > 0) stringResource(R.string.today_stat_streak_unit) else null,
-                valueColor = if (state.streak > 0) colors.accent else colors.textSecondary,
+                value = state.streak.toString(),
+                unit = if (state.streak == 1) stringResource(R.string.today_stat_streak_unit_single) else stringResource(R.string.today_stat_streak_unit),
+                valueColor = if (state.streak > 0) colors.accent else colors.textPrimary,
                 backgroundColor = if (state.streak > 0) colors.accent.copy(alpha = 0.08f) else colors.surface,
                 colors = colors,
                 modifier = Modifier
