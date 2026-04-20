@@ -6,6 +6,7 @@ import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.state.updateAppWidgetState
+import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.github.eylulnc.aura.constants.MOODS
 import com.github.eylulnc.aura.repository.MoodDao
 import kotlinx.coroutines.CoroutineScope
@@ -26,7 +27,6 @@ class AuraMoodWidgetReceiver : GlanceAppWidgetReceiver() {
     }
 
     companion object {
-
         fun requestUpdate(context: Context) {
             CoroutineScope(Dispatchers.IO).launch {
                 val dao = getKoin().get<MoodDao>()
@@ -36,18 +36,15 @@ class AuraMoodWidgetReceiver : GlanceAppWidgetReceiver() {
                 val dateLabel = today.format(
                     DateTimeFormatter.ofPattern("EEE, MMM d", Locale.getDefault())
                 )
-
                 val glanceIds = GlanceAppWidgetManager(context)
                     .getGlanceIds(AuraMoodWidget::class.java)
-
                 glanceIds.forEach { id ->
-                    updateAppWidgetState(context, id) {
-                        if (mood != null) {
-                            it[AuraMoodWidget.KEY_MOOD_ID] = mood.id
-                        } else {
-                            it.remove(AuraMoodWidget.KEY_MOOD_ID)
+                    updateAppWidgetState(context, PreferencesGlanceStateDefinition, id) { prefs ->
+                        prefs.toMutablePreferences().apply {
+                            if (mood != null) this[AuraMoodWidget.KEY_MOOD_ID] = mood.id
+                            else remove(AuraMoodWidget.KEY_MOOD_ID)
+                            this[AuraMoodWidget.KEY_DATE_LABEL] = dateLabel
                         }
-                        it[AuraMoodWidget.KEY_DATE_LABEL] = dateLabel
                     }
                     AuraMoodWidget().update(context, id)
                 }

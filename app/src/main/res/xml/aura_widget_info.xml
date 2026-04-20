@@ -4,9 +4,7 @@
     android:minHeight="110dp"
     android:targetCellWidth="2"
     android:targetCellHeight="2"
-    android:maxResizeWidth="400dp"
-    android:maxResizeHeight="300dp"
-    android:resizeMode="horizontal|vertical"
+    android:resizeMode="none"
     android:updatePeriodMillis="1800000"
     android:widgetCategory="home_screen"
     android:description="@string/widget_description" />
