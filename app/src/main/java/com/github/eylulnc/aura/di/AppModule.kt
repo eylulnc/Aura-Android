@@ -2,6 +2,7 @@ package com.github.eylulnc.aura.di
 
 import androidx.room.Room
 import com.github.eylulnc.aura.auth.AuthRepository
+import com.github.eylulnc.aura.notification.NotificationScheduler
 import com.github.eylulnc.aura.preferences.AppPreferences
 import com.github.eylulnc.aura.repository.AuraDatabase
 import com.github.eylulnc.aura.repository.MoodRepository
@@ -30,7 +31,9 @@ val appModule = module {
 
     single { AppPreferences(androidContext()) }
 
+    single { NotificationScheduler(androidContext()) }
+
     viewModel { TodayViewModel(get()) }
     viewModel { HistoryViewModel(get()) }
-    viewModel { SettingsViewModel(get(), get(), get()) }
+    viewModel { SettingsViewModel(get(), get(), get(), get()) }
 }

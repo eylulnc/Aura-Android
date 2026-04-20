@@ -2,6 +2,7 @@ package com.github.eylulnc.aura
 
 import android.app.Application
 import com.github.eylulnc.aura.di.appModule
+import com.github.eylulnc.aura.notification.NotificationHelper
 import com.github.eylulnc.aura.preferences.AppPreferences
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -16,5 +17,6 @@ class AuraApplication : Application() {
             modules(appModule)
         }
         getKoin().get<AppPreferences>().recordFirstLaunchIfNeeded()
+        NotificationHelper.createChannel(this)
     }
 }
