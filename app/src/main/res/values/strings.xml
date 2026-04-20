@@ -72,4 +72,14 @@
     <string name="data_privacy_delete_account_confirm_action">Delete account</string>
     <string name="settings_version">Version %1$s</string>
     <string name="settings_developer">by Eylül Naz Can</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_name">Daily Reminder</string>
+    <string name="notification_channel_description">Reminds you to log your mood each day</string>
+    <string name="notification_title">How are you feeling today?</string>
+    <string name="notification_body">Tap to log your mood.</string>
+    <string name="settings_section_reminders">Reminders</string>
+    <string name="settings_reminders_toggle">Daily reminder</string>
+    <string name="settings_reminders_time">Reminder time</string>
+    <string name="notification_time_confirm">OK</string>
 </resources>
