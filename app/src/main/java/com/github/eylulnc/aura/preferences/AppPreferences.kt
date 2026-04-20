@@ -38,9 +38,29 @@ class AppPreferences(context: Context) {
 
     fun resetOnboarding() = prefs.edit { remove(KEY_ONBOARDING_DONE) }
 
+    fun isNotificationsEnabled(): Boolean = prefs.getBoolean(KEY_NOTIFICATIONS_ENABLED, false)
+
+    fun setNotificationsEnabled(enabled: Boolean) =
+        prefs.edit { putBoolean(KEY_NOTIFICATIONS_ENABLED, enabled) }
+
+    fun getReminderHour(): Int = prefs.getInt(KEY_REMINDER_HOUR, DEFAULT_REMINDER_HOUR)
+
+    fun getReminderMinute(): Int = prefs.getInt(KEY_REMINDER_MINUTE, DEFAULT_REMINDER_MINUTE)
+
+    fun setReminderTime(hour: Int, minute: Int) =
+        prefs.edit {
+            putInt(KEY_REMINDER_HOUR, hour)
+            putInt(KEY_REMINDER_MINUTE, minute)
+        }
+
     companion object {
         private const val KEY_FIRST_LAUNCH = "first_launch_date"
         private const val KEY_THEME = "theme_mode"
         private const val KEY_ONBOARDING_DONE = "onboarding_done"
+        private const val KEY_NOTIFICATIONS_ENABLED = "notifications_enabled"
+        private const val KEY_REMINDER_HOUR = "reminder_hour"
+        private const val KEY_REMINDER_MINUTE = "reminder_minute"
+        const val DEFAULT_REMINDER_HOUR = 20
+        const val DEFAULT_REMINDER_MINUTE = 0
     }
 }

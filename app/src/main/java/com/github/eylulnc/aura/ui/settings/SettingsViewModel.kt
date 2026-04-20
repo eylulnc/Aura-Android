@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.eylulnc.aura.auth.AuthRepository
+import com.github.eylulnc.aura.notification.NotificationScheduler
 import com.github.eylulnc.aura.preferences.AppPreferences
 import com.github.eylulnc.aura.repository.MoodRepository
 import com.google.firebase.auth.FirebaseUser
@@ -20,11 +21,21 @@ enum class ThemeMode { LIGHT, DARK, SYSTEM }
 class SettingsViewModel(
     private val prefs: AppPreferences,
     private val repository: MoodRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val notificationScheduler: NotificationScheduler
 ) : ViewModel() {
 
     private val _themeMode = MutableStateFlow(prefs.getThemeMode())
     val themeMode: StateFlow<ThemeMode> = _themeMode.asStateFlow()
+
+    private val _notificationsEnabled = MutableStateFlow(prefs.isNotificationsEnabled())
+    val notificationsEnabled: StateFlow<Boolean> = _notificationsEnabled.asStateFlow()
+
+    private val _reminderHour = MutableStateFlow(prefs.getReminderHour())
+    val reminderHour: StateFlow<Int> = _reminderHour.asStateFlow()
+
+    private val _reminderMinute = MutableStateFlow(prefs.getReminderMinute())
+    val reminderMinute: StateFlow<Int> = _reminderMinute.asStateFlow()
 
     val currentUser: StateFlow<FirebaseUser?> = authRepository.authStateFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, authRepository.currentUser)
@@ -111,6 +122,25 @@ class SettingsViewModel(
                 _isSyncing.value = false
                 _signInError.value = e.message
             }
+        }
+    }
+
+    fun setNotificationsEnabled(enabled: Boolean) {
+        prefs.setNotificationsEnabled(enabled)
+        _notificationsEnabled.value = enabled
+        if (enabled) {
+            notificationScheduler.schedule(prefs.getReminderHour(), prefs.getReminderMinute())
+        } else {
+            notificationScheduler.cancel()
+        }
+    }
+
+    fun setReminderTime(hour: Int, minute: Int) {
+        prefs.setReminderTime(hour, minute)
+        _reminderHour.value = hour
+        _reminderMinute.value = minute
+        if (prefs.isNotificationsEnabled()) {
+            notificationScheduler.schedule(hour, minute)
         }
     }
 

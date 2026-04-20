@@ -1,5 +1,10 @@
 package com.github.eylulnc.aura.ui.settings
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,16 +19,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.foundation.shape.CircleShape
+import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import com.github.eylulnc.aura.BuildConfig
 import com.github.eylulnc.aura.R
 import com.github.eylulnc.aura.ui.theme.*
 import org.koin.androidx.compose.koinViewModel
+import java.util.Locale
 
 @Composable
 fun SettingsScreen(
@@ -35,7 +43,17 @@ fun SettingsScreen(
     val themeMode by viewModel.themeMode.collectAsState()
     val currentUser by viewModel.currentUser.collectAsState()
     val signInError by viewModel.signInError.collectAsState()
+    val notificationsEnabled by viewModel.notificationsEnabled.collectAsState()
+    val reminderHour by viewModel.reminderHour.collectAsState()
+    val reminderMinute by viewModel.reminderMinute.collectAsState()
     val context = LocalContext.current
+    var showTimePicker by remember { mutableStateOf(false) }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) viewModel.setNotificationsEnabled(true)
+    }
 
     val versionName = remember {
         context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "—"
@@ -120,6 +138,76 @@ fun SettingsScreen(
                 ThemePicker(selected = themeMode, onSelect = viewModel::setThemeMode, colors = colors)
             }
 
+            SettingsGroup(label = stringResource(R.string.settings_section_reminders), colors = colors) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.settings_reminders_toggle),
+                        fontSize = FontSize.m,
+                        color = colors.textPrimary
+                    )
+                    Switch(
+                        checked = notificationsEnabled,
+                        onCheckedChange = { enabled ->
+                            if (enabled) {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                    ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+                                ) {
+                                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                } else {
+                                    viewModel.setNotificationsEnabled(true)
+                                }
+                            } else {
+                                viewModel.setNotificationsEnabled(false)
+                            }
+                        },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = colors.surface,
+                            checkedTrackColor = colors.accent,
+                            uncheckedThumbColor = colors.textSecondary,
+                            uncheckedTrackColor = colors.surfaceSubtle
+                        )
+                    )
+                }
+                if (notificationsEnabled) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = Spacing.s),
+                        thickness = 0.5.dp,
+                        color = colors.textSecondary.copy(alpha = 0.15f)
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showTimePicker = true }
+                            .padding(vertical = Spacing.xs),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.settings_reminders_time),
+                            fontSize = FontSize.m,
+                            color = colors.textPrimary
+                        )
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(Spacing.s))
+                                .background(colors.surfaceSubtle)
+                                .padding(horizontal = Spacing.m, vertical = Spacing.xs)
+                        ) {
+                            Text(
+                                text = formatTime(reminderHour, reminderMinute),
+                                fontSize = FontSize.s,
+                                fontWeight = FontWeight.Medium,
+                                color = colors.accent
+                            )
+                        }
+                    }
+                }
+            }
+
             SettingsGroup(label = stringResource(R.string.settings_section_data_privacy), colors = colors) {
                 Row(
                     modifier = Modifier
@@ -185,6 +273,19 @@ fun SettingsScreen(
         }
     }
 
+    if (showTimePicker) {
+        ReminderTimePickerDialog(
+            initialHour = reminderHour,
+            initialMinute = reminderMinute,
+            onConfirm = { h, m ->
+                viewModel.setReminderTime(h, m)
+                showTimePicker = false
+            },
+            onDismiss = { showTimePicker = false },
+            colors = colors
+        )
+    }
+
     signInError?.let { error ->
         AlertDialog(
             onDismissRequest = { viewModel.clearSignInError() },
@@ -220,6 +321,50 @@ internal fun SettingsGroup(label: String, colors: AuraColors, content: @Composab
             content = content
         )
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ReminderTimePickerDialog(
+    initialHour: Int,
+    initialMinute: Int,
+    onConfirm: (Int, Int) -> Unit,
+    onDismiss: () -> Unit,
+    colors: AuraColors
+) {
+    val state = rememberTimePickerState(initialHour = initialHour, initialMinute = initialMinute, is24Hour = false)
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = MaterialTheme.shapes.extraLarge,
+            color = colors.surface,
+            tonalElevation = 6.dp
+        ) {
+            Column(
+                modifier = Modifier.padding(Spacing.l),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                TimePicker(state = state)
+                Spacer(Modifier.height(Spacing.l))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text(stringResource(R.string.settings_delete_cancel), color = colors.textSecondary)
+                    }
+                    TextButton(onClick = { onConfirm(state.hour, state.minute) }) {
+                        Text(stringResource(R.string.notification_time_confirm), color = colors.accent)
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun formatTime(hour: Int, minute: Int): String {
+    val h = if (hour % 12 == 0) 12 else hour % 12
+    val suffix = if (hour < 12) "AM" else "PM"
+    return String.format(Locale.getDefault(), "%d:%02d %s", h, minute, suffix)
 }
 
 @Composable
