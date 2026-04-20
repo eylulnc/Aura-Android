@@ -31,7 +31,10 @@ object NotificationHelper {
 
     fun post(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+            ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
         ) return
 
         val tapIntent = PendingIntent.getActivity(
@@ -52,6 +55,7 @@ object NotificationHelper {
             .setAutoCancel(true)
             .build()
 
-        context.getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification)
+        context.getSystemService(NotificationManager::class.java)
+            .notify(NOTIFICATION_ID, notification)
     }
 }
