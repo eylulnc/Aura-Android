@@ -1,6 +1,7 @@
 package com.github.eylulnc.aura.repository
 
 import com.github.eylulnc.aura.auth.AuthRepository
+import com.github.eylulnc.aura.constants.SyncState
 import com.github.eylulnc.aura.model.MoodEntry
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -133,6 +134,62 @@ class MoodRepository(
         firestore.userEntries(userId).document(synced.id).set(synced.toMap()).await()
     }
 
+    suspend fun checkSyncStateOnLogin(): SyncState {
+        val userId = authRepository.currentUser?.uid ?: return SyncState.NO_DATA
+
+        // Check if there is local guest data
+        val localGuestEntries = dao.getAll("")
+        val hasLocalData = localGuestEntries.isNotEmpty()
+
+        // Check if the remote account already has data
+        val remoteDocs = firestore.userEntries(userId).limit(1).get().await()
+        val hasRemoteData = !remoteDocs.isEmpty
+
+        return when {
+            hasLocalData && !hasRemoteData -> SyncState.UPLOAD_LOCAL
+            !hasLocalData && hasRemoteData -> SyncState.DOWNLOAD_REMOTE
+            hasLocalData && hasRemoteData -> SyncState.CONFLICT
+            else -> SyncState.NO_DATA
+        }
+    }
+
+    // Option A: Keep Device Data (Upload local, overwrite remote)
+    suspend fun pushLocalToRemote() {
+        val userId = authRepository.currentUser?.uid ?: return
+        val now = System.currentTimeMillis()
+
+        // Grab guest entries and assign them to the new user
+        val localEntries = dao.getAll("")
+        localEntries.forEach { entry ->
+            val withUser = entry.copy(userId = userId, syncedAt = now)
+            dao.update(withUser)
+            firestore.userEntries(userId).document(withUser.id).set(withUser.toMap()).await()
+        }
+    }
+
+    // Option B: Keep Account Data (Wipe local guest data, download remote)
+    suspend fun pullRemoteToLocal() {
+        val userId = authRepository.currentUser?.uid ?: return
+
+        // Wipe the local guest data
+        dao.deleteAll()
+
+        // Fetch and save all remote entries locally
+        val remoteEntries = firestore.userEntries(userId).get().await()
+        remoteEntries.forEach { doc ->
+            val entry = MoodEntry(
+                id = doc.id,
+                userId = doc.getString("userId") ?: userId,
+                date = doc.getString("date") ?: return@forEach,
+                timestamp = doc.getLong("timestamp") ?: return@forEach,
+                mood = doc.getLong("mood")?.toInt() ?: return@forEach,
+                note = doc.getString("note"),
+                syncedAt = doc.getLong("syncedAt")
+            )
+            dao.insert(entry)
+        }
+    }
+
     suspend fun seedDemoData() {
         val userId = currentUid()
         val start = LocalDate.of(2025, 11, 1)
@@ -176,3 +233,4 @@ private fun MoodEntry.toMap() = mapOf(
     "note" to note,
     "syncedAt" to syncedAt
 )
+
