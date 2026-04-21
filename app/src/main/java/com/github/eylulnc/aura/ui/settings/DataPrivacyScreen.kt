@@ -71,6 +71,13 @@ fun DataPrivacyScreen(
         ) {
             if (currentUser != null) {
                 DestructiveCard(
+                    title = stringResource(R.string.data_privacy_delete_data_title),
+                    description = stringResource(R.string.data_privacy_delete_data_signed_in_description),
+                    buttonLabel = stringResource(R.string.data_privacy_delete_data_button),
+                    colors = colors,
+                    onClick = { showDeleteDataDialog = true }
+                )
+                DestructiveCard(
                     title = stringResource(R.string.data_privacy_delete_account_title),
                     description = stringResource(R.string.data_privacy_delete_account_description),
                     buttonLabel = stringResource(R.string.data_privacy_delete_account_button),
@@ -107,7 +114,14 @@ fun DataPrivacyScreen(
         AlertDialog(
             onDismissRequest = { showDeleteDataDialog = false },
             title = { Text(stringResource(R.string.data_privacy_delete_data_confirm_title)) },
-            text = { Text(stringResource(R.string.data_privacy_delete_data_confirm_body)) },
+            text = {
+                Text(
+                    stringResource(
+                        if (currentUser != null) R.string.data_privacy_delete_data_signed_in_confirm_body
+                        else R.string.data_privacy_delete_data_confirm_body
+                    )
+                )
+            },
             confirmButton = {
                 TextButton(onClick = {
                     showDeleteDataDialog = false
