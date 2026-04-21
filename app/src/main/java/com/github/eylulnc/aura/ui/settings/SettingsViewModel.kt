@@ -207,7 +207,4 @@ class SettingsViewModel(
         }
     }
 
-    fun seedDemoData() {
-        viewModelScope.launch { repository.seedDemoData() }
-    }
 }

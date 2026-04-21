@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.foundation.shape.CircleShape
 import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
-import com.github.eylulnc.aura.BuildConfig
 import com.github.eylulnc.aura.R
 import com.github.eylulnc.aura.ui.theme.*
 import org.koin.androidx.compose.koinViewModel
@@ -227,20 +226,6 @@ fun SettingsScreen(
                         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                         contentDescription = null,
                         tint = colors.textSecondary
-                    )
-                }
-            }
-
-            if (BuildConfig.DEBUG) {
-                SettingsGroup(label = "Dev", colors = colors) {
-                    Text(
-                        text = "Seed demo data (Nov → yesterday)",
-                        fontSize = FontSize.m,
-                        color = colors.accent,
-                        modifier = Modifier
-                            .clickable { viewModel.seedDemoData() }
-                            .fillMaxWidth()
-                            .padding(vertical = Spacing.xs)
                     )
                 }
             }
