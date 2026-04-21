@@ -3,7 +3,9 @@ package com.github.eylulnc.aura.repository
 import com.github.eylulnc.aura.auth.AuthRepository
 import com.github.eylulnc.aura.model.MoodEntry
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.tasks.await
 import java.time.Instant
 import java.time.LocalDate
@@ -21,9 +23,17 @@ class MoodRepository(
 
     private fun currentUid(): String = authRepository.currentUser?.uid ?: ""
 
-    fun getAllFlow(): Flow<List<MoodEntry>> = dao.getAllFlow(currentUid())
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getAllFlow(): Flow<List<MoodEntry>> =
+        authRepository.authStateFlow.flatMapLatest { user ->
+            dao.getAllFlow(user?.uid ?: "")
+        }
 
-    fun getTodayFlow(): Flow<MoodEntry?> = dao.getByDateFlow(currentUid(), today())
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getTodayFlow(): Flow<MoodEntry?> =
+        authRepository.authStateFlow.flatMapLatest { user ->
+            dao.getByDateFlow(user?.uid ?: "", today())
+        }
 
     suspend fun getAll(): List<MoodEntry> = dao.getAll(currentUid())
 

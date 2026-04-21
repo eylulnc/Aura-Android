@@ -7,6 +7,8 @@ import com.github.eylulnc.aura.auth.AuthRepository
 import com.github.eylulnc.aura.notification.NotificationScheduler
 import com.github.eylulnc.aura.preferences.AppPreferences
 import com.github.eylulnc.aura.repository.MoodRepository
+import com.github.eylulnc.aura.widget.AuraMoodWidgetReceiver
+import com.github.eylulnc.aura.widget.AuraStreakWidgetReceiver
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -61,6 +63,8 @@ class SettingsViewModel(
                     repository.getEarliestEntryDate()?.let { dateStr ->
                         prefs.updateFirstLaunchIfEarlier(java.time.LocalDate.parse(dateStr))
                     }
+                    AuraMoodWidgetReceiver.requestUpdate(activityContext)
+                    AuraStreakWidgetReceiver.requestUpdate(activityContext)
                     onResult?.invoke(true)
                 } else {
                     _signInError.value = result.exceptionOrNull()?.message
