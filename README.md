@@ -45,6 +45,18 @@ over time, and understand your emotional trends at a glance.
   </tr>
 </table>
 
+### Widgets
+
+<table>
+  <tr>
+    <td align="center"><b>Empty</b></td>
+    <td align="center"><b>Logged</b></td>
+  </tr>
+  <tr>
+    <td><img width="300" src="docs/screenshots/widgets_empty.png" /></td>
+    <td><img width="300" src="docs/screenshots/widgets_logged.png" /></td>
+  </tr>
+</table>
 
 <br>
 
@@ -109,10 +121,9 @@ over time, and understand your emotional trends at a glance.
 
 ## Roadmap
 
-- [ ] Daily reminder notification — prompt to log mood at a chosen time
-- [ ] Home screen widget — see today's mood or quick-log without opening the app
+- [x] Daily reminder notification — prompt to log mood at a chosen time
+- [x] Home screen widget — see today's mood or streak without opening the app
 - [ ] iOS app — native SwiftUI, same Firebase project
-- [ ] Data export — download entries as CSV
 - [ ] Extended trends — monthly and yearly mood views
 
 <br>
