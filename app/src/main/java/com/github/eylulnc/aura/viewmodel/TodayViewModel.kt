@@ -1,12 +1,15 @@
 package com.github.eylulnc.aura.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.eylulnc.aura.constants.POSITIVE_MOOD_IDS
 import com.github.eylulnc.aura.constants.MoodFace
 import com.github.eylulnc.aura.constants.getMoodFace
 import com.github.eylulnc.aura.model.MoodEntry
 import com.github.eylulnc.aura.repository.MoodRepository
+import com.github.eylulnc.aura.widget.AuraMoodWidgetReceiver
+import com.github.eylulnc.aura.widget.AuraStreakWidgetReceiver
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +27,10 @@ data class TodayUiState(
     val positivePercent: Int? = null
 )
 
-class TodayViewModel(private val repository: MoodRepository) : ViewModel() {
+class TodayViewModel(
+    application: Application,
+    private val repository: MoodRepository
+) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(TodayUiState())
     val uiState: StateFlow<TodayUiState> = _uiState.asStateFlow()
@@ -55,6 +61,8 @@ class TodayViewModel(private val repository: MoodRepository) : ViewModel() {
             val entry = _uiState.value.todayEntry
             if (entry == null) repository.logMood(moodId, note)
             else repository.editMood(entry, moodId, note)
+            AuraMoodWidgetReceiver.requestUpdate(getApplication())
+            AuraStreakWidgetReceiver.requestUpdate(getApplication())
         }
     }
 

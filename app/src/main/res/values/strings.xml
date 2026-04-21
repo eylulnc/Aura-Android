@@ -15,6 +15,7 @@
     <!-- Today dashboard stats -->
     <string name="today_stat_streak">Streak</string>
     <string name="today_stat_streak_unit">days</string>
+    <string name="today_stat_streak_unit_single">day</string>
     <string name="today_stat_days_logged">This month</string>
     <string name="today_stat_days_unit">days logged</string>
     <string name="today_stat_top_mood">Top mood</string>
@@ -82,4 +83,10 @@
     <string name="settings_reminders_toggle">Daily reminder</string>
     <string name="settings_reminders_time">Reminder time</string>
     <string name="notification_time_confirm">OK</string>
+
+    <!-- Widget -->
+    <string name="widget_description">Shows today\'s mood at a glance</string>
+    <string name="widget_streak_description">Shows your current mood streak</string>
+    <string name="widget_log_mood">Log mood</string>
+    <string name="widget_log_today">Log today</string>
 </resources>

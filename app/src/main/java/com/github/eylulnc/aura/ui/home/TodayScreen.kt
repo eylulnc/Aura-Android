@@ -2,7 +2,19 @@ package com.github.eylulnc.aura.ui.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -11,25 +23,34 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.core.graphics.toColorInt
 import com.github.eylulnc.aura.R
 import com.github.eylulnc.aura.constants.getMoodFace
 import com.github.eylulnc.aura.model.MoodEntry
 import com.github.eylulnc.aura.ui.components.MoodSvgImage
+import com.github.eylulnc.aura.ui.events.MoodLoggerEvents
 import com.github.eylulnc.aura.ui.home.components.LogMoodSheet
 import com.github.eylulnc.aura.ui.home.components.MoodStatCard
+import com.github.eylulnc.aura.ui.home.components.MoodTrendCard
 import com.github.eylulnc.aura.ui.home.components.TextStatCard
 import com.github.eylulnc.aura.ui.home.components.TopMoodsCard
-import com.github.eylulnc.aura.ui.home.components.MoodTrendCard
-import com.github.eylulnc.aura.ui.theme.*
+import com.github.eylulnc.aura.ui.theme.AuraColors
+import com.github.eylulnc.aura.ui.theme.FontSize
+import com.github.eylulnc.aura.ui.theme.Spacing
+import com.github.eylulnc.aura.ui.theme.auraColors
 import com.github.eylulnc.aura.viewmodel.TodayViewModel
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
@@ -42,6 +63,18 @@ fun TodayScreen(viewModel: TodayViewModel = koinViewModel()) {
     val state by viewModel.uiState.collectAsState()
     val colors = auraColors
     var showSheet by remember { mutableStateOf(false) }
+
+    val openMoodRequest by MoodLoggerEvents.openRequest.collectAsState()
+    var lastHandledOpenRequest by remember { mutableStateOf(0L) }
+    LaunchedEffect(openMoodRequest, state.isLoading) {
+        if (openMoodRequest != 0L &&
+            openMoodRequest != lastHandledOpenRequest &&
+            !state.isLoading
+        ) {
+            lastHandledOpenRequest = openMoodRequest
+            showSheet = true
+        }
+    }
 
     if (state.isLoading) {
         Box(
@@ -84,9 +117,9 @@ fun TodayScreen(viewModel: TodayViewModel = koinViewModel()) {
         ) {
             TextStatCard(
                 label = stringResource(R.string.today_stat_streak),
-                value = if (state.streak > 0) state.streak.toString() else "—",
-                unit = if (state.streak > 0) stringResource(R.string.today_stat_streak_unit) else null,
-                valueColor = if (state.streak > 0) colors.accent else colors.textSecondary,
+                value = state.streak.toString(),
+                unit = if (state.streak == 1) stringResource(R.string.today_stat_streak_unit_single) else stringResource(R.string.today_stat_streak_unit),
+                valueColor = if (state.streak > 0) colors.accent else colors.textPrimary,
                 backgroundColor = if (state.streak > 0) colors.accent.copy(alpha = 0.08f) else colors.surface,
                 colors = colors,
                 modifier = Modifier
