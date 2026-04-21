@@ -90,42 +90,6 @@ class MoodRepository(
         docs.forEach { firestore.userEntries(userId).document(it.id).delete().await() }
     }
 
-    suspend fun syncAllToFirestore() {
-        val userId = authRepository.currentUser?.uid ?: return
-        val now = System.currentTimeMillis()
-
-        // Push local entries to Firestore (scoped to this user, plus any legacy
-        // guest rows that still have an empty userId)
-        val localEntries = dao.getAll(userId) + dao.getAll("")
-        localEntries.forEach { entry ->
-            val withUser = entry.copy(userId = userId, syncedAt = now)
-            dao.update(withUser)
-            firestore.userEntries(userId).document(withUser.id).set(withUser.toMap()).await()
-        }
-
-        // Pull remote entries — skip if a newer local entry exists for the same date
-        val localIds = localEntries.map { it.id }.toSet()
-        val localByDate = localEntries.associateBy { it.date }
-        val remoteEntries = firestore.userEntries(userId).get().await()
-        remoteEntries.forEach { doc ->
-            if (doc.id in localIds) return@forEach
-            val date = doc.getString("date") ?: return@forEach
-            val remoteTimestamp = doc.getLong("timestamp") ?: return@forEach
-            val localForDate = localByDate[date]
-            if (localForDate != null && localForDate.timestamp >= remoteTimestamp) return@forEach
-            val entry = MoodEntry(
-                id = doc.id,
-                userId = doc.getString("userId") ?: userId,
-                date = date,
-                timestamp = remoteTimestamp,
-                mood = doc.getLong("mood")?.toInt() ?: return@forEach,
-                note = doc.getString("note"),
-                syncedAt = doc.getLong("syncedAt")
-            )
-            dao.insert(entry)
-        }
-    }
-
     private suspend fun syncToFirestore(entry: MoodEntry) {
         val userId = authRepository.currentUser?.uid ?: return
         val now = System.currentTimeMillis()
