@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.core.graphics.toColorInt
 import com.github.eylulnc.aura.constants.MoodFace
 import com.github.eylulnc.aura.ui.components.MoodSvgImage
@@ -44,7 +46,7 @@ fun MoodStatCard(
         Row(verticalAlignment = Alignment.CenterVertically) {
             MoodSvgImage(face, Modifier.size(Spacing.moodFaceMediumSize))
             Spacer(Modifier.width(Spacing.s))
-            Text(text = face.label, fontSize = FontSize.m, fontWeight = FontWeight.SemiBold, color = moodColor)
+            Text(text = face.label, fontSize = FontSize.s, fontWeight = FontWeight.SemiBold, color = moodColor)
         }
     }
 }
