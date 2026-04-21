@@ -124,6 +124,7 @@ class SettingsViewModel(
         }
         AuraMoodWidgetReceiver.requestUpdate(activityContext)
         AuraStreakWidgetReceiver.requestUpdate(activityContext)
+        _isSyncing.value = false
         onResult?.invoke(true)
     }
 
@@ -156,10 +157,19 @@ class SettingsViewModel(
         _signInError.value = null
     }
 
-    fun deleteAllData(onComplete: () -> Unit) {
+    fun deleteAllData(context: Context, onComplete: () -> Unit) {
         viewModelScope.launch {
-            repository.deleteAll()
-            onComplete()
+            _isSyncing.value = true
+            try {
+                repository.deleteAll()
+                AuraMoodWidgetReceiver.requestUpdate(context)
+                AuraStreakWidgetReceiver.requestUpdate(context)
+                onComplete()
+            } catch (e: Exception) {
+                _signInError.value = e.message
+            } finally {
+                _isSyncing.value = false
+            }
         }
     }
 

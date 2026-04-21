@@ -125,7 +125,9 @@ fun DataPrivacyScreen(
             confirmButton = {
                 TextButton(onClick = {
                     showDeleteDataDialog = false
-                    viewModel.deleteAllData {}
+                    viewModel.deleteAllData(context) {
+                        Toast.makeText(context, context.getString(R.string.data_privacy_delete_data_success), Toast.LENGTH_SHORT).show()
+                    }
                 }) {
                     Text(
                         stringResource(R.string.data_privacy_delete_data_confirm_action),
@@ -151,7 +153,7 @@ fun DataPrivacyScreen(
                 TextButton(onClick = {
                     showDeleteAccountDialog = false
                     viewModel.deleteAccount(context) {
-                        Toast.makeText(context, "Account deleted successfully", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.data_privacy_delete_account_success), Toast.LENGTH_SHORT).show()
                         onAccountDeleted()
                     }
                 }) {

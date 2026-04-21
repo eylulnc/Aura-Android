@@ -73,6 +73,8 @@
     <string name="data_privacy_delete_account_confirm_title">Delete account?</string>
     <string name="data_privacy_delete_account_confirm_body">This will permanently delete your account and all your mood entries, both locally and from the cloud. This cannot be undone.</string>
     <string name="data_privacy_delete_account_confirm_action">Delete account</string>
+    <string name="data_privacy_delete_account_success">Account deleted successfully</string>
+    <string name="data_privacy_delete_data_success">All data deleted successfully</string>
     <string name="settings_version">Version %1$s</string>
     <string name="settings_developer">by Eylül Naz Can</string>
 
