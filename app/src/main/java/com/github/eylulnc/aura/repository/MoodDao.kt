@@ -19,21 +19,21 @@ interface MoodDao {
     @Query("DELETE FROM mood_entries")
     suspend fun deleteAll()
 
-    @Query("SELECT * FROM mood_entries ORDER BY timestamp DESC")
-    fun getAllFlow(): Flow<List<MoodEntry>>
+    @Query("SELECT * FROM mood_entries WHERE userId = :userId ORDER BY timestamp DESC")
+    fun getAllFlow(userId: String): Flow<List<MoodEntry>>
 
-    @Query("SELECT * FROM mood_entries ORDER BY timestamp DESC")
-    suspend fun getAll(): List<MoodEntry>
+    @Query("SELECT * FROM mood_entries WHERE userId = :userId ORDER BY timestamp DESC")
+    suspend fun getAll(userId: String): List<MoodEntry>
 
-    @Query("SELECT * FROM mood_entries WHERE date = :date ORDER BY timestamp DESC LIMIT 1")
-    suspend fun getByDate(date: String): MoodEntry?
+    @Query("SELECT * FROM mood_entries WHERE userId = :userId AND date = :date LIMIT 1")
+    suspend fun getByDate(userId: String, date: String): MoodEntry?
 
-    @Query("SELECT * FROM mood_entries WHERE date = :date ORDER BY timestamp DESC LIMIT 1")
-    fun getByDateFlow(date: String): Flow<MoodEntry?>
+    @Query("SELECT * FROM mood_entries WHERE userId = :userId AND date = :date LIMIT 1")
+    fun getByDateFlow(userId: String, date: String): Flow<MoodEntry?>
 
     @Query("SELECT * FROM mood_entries WHERE id = :id")
     suspend fun getById(id: String): MoodEntry?
 
-    @Query("SELECT MIN(date) FROM mood_entries")
-    suspend fun getEarliestDate(): String?
+    @Query("SELECT MIN(date) FROM mood_entries WHERE userId = :userId")
+    suspend fun getEarliestDate(userId: String): String?
 }

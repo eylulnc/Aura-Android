@@ -19,19 +19,21 @@ class MoodRepository(
 
     private val firestore = FirebaseFirestore.getInstance()
 
-    fun getAllFlow(): Flow<List<MoodEntry>> = dao.getAllFlow()
+    private fun currentUid(): String = authRepository.currentUser?.uid ?: ""
 
-    fun getTodayFlow(): Flow<MoodEntry?> = dao.getByDateFlow(today())
+    fun getAllFlow(): Flow<List<MoodEntry>> = dao.getAllFlow(currentUid())
 
-    suspend fun getAll(): List<MoodEntry> = dao.getAll()
+    fun getTodayFlow(): Flow<MoodEntry?> = dao.getByDateFlow(currentUid(), today())
 
-    suspend fun getEarliestEntryDate(): String? = dao.getEarliestDate()
+    suspend fun getAll(): List<MoodEntry> = dao.getAll(currentUid())
 
-    suspend fun getToday(): MoodEntry? = dao.getByDate(today())
+    suspend fun getEarliestEntryDate(): String? = dao.getEarliestDate(currentUid())
+
+    suspend fun getToday(): MoodEntry? = dao.getByDate(currentUid(), today())
 
     suspend fun logMood(moodId: Int, note: String?) {
-        val userId = authRepository.currentUser?.uid
-        val existing = dao.getByDate(today())
+        val userId = currentUid()
+        val existing = dao.getByDate(userId, today())
         if (existing != null) {
             val updated = existing.copy(
                 mood = moodId,
@@ -81,8 +83,9 @@ class MoodRepository(
         val userId = authRepository.currentUser?.uid ?: return
         val now = System.currentTimeMillis()
 
-        // Push local entries to Firestore
-        val localEntries = dao.getAll()
+        // Push local entries to Firestore (scoped to this user, plus any legacy
+        // guest rows that still have an empty userId)
+        val localEntries = dao.getAll(userId) + dao.getAll("")
         localEntries.forEach { entry ->
             val withUser = entry.copy(userId = userId, syncedAt = now)
             dao.update(withUser)
@@ -101,7 +104,7 @@ class MoodRepository(
             if (localForDate != null && localForDate.timestamp >= remoteTimestamp) return@forEach
             val entry = MoodEntry(
                 id = doc.id,
-                userId = doc.getString("userId"),
+                userId = doc.getString("userId") ?: userId,
                 date = date,
                 timestamp = remoteTimestamp,
                 mood = doc.getLong("mood")?.toInt() ?: return@forEach,
@@ -121,6 +124,7 @@ class MoodRepository(
     }
 
     suspend fun seedDemoData() {
+        val userId = currentUid()
         val start = LocalDate.of(2025, 11, 1)
         val end = LocalDate.now().minusDays(1)
         val weightedMoods = listOf(3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 9, 10, 11, 12, 1, 2, 13)
@@ -128,13 +132,16 @@ class MoodRepository(
         while (!date.isAfter(end)) {
             if (Random.nextFloat() > 0.2f) {
                 val dateStr = date.toString()
-                if (dao.getByDate(dateStr) == null) {
-                    dao.insert(MoodEntry(
-                        id = UUID.randomUUID().toString(),
-                        date = dateStr,
-                        timestamp = date.atStartOfDay(ZoneId.systemDefault()).toEpochSecond() * 1000,
-                        mood = weightedMoods.random()
-                    ))
+                if (dao.getByDate(userId, dateStr) == null) {
+                    dao.insert(
+                        MoodEntry(
+                            id = UUID.randomUUID().toString(),
+                            userId = userId,
+                            date = dateStr,
+                            timestamp = date.atStartOfDay(ZoneId.systemDefault()).toEpochSecond() * 1000,
+                            mood = weightedMoods.random()
+                        )
+                    )
                 }
             }
             date = date.plusDays(1)
