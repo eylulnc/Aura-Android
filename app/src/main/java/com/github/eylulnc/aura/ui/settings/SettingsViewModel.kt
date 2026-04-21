@@ -128,8 +128,11 @@ class SettingsViewModel(
     }
 
     fun dismissSyncConflict() {
-        _showSyncConflictDialog.value = false
-        signOut {}
+        viewModelScope.launch {
+            _showSyncConflictDialog.value = false
+            authRepository.signOut()
+            _isSyncing.value = false
+        }
     }
 
     fun completeOnboarding() = prefs.setOnboardingCompleted()

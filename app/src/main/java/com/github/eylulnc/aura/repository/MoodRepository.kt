@@ -122,6 +122,9 @@ class MoodRepository(
         val userId = authRepository.currentUser?.uid ?: return
         val now = System.currentTimeMillis()
 
+        val remoteDocs = firestore.userEntries(userId).get().await()
+        remoteDocs.forEach { firestore.userEntries(userId).document(it.id).delete().await() }
+
         // Grab guest entries and assign them to the new user
         val localEntries = dao.getAll("")
         localEntries.forEach { entry ->
