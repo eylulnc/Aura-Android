@@ -8,7 +8,7 @@ import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.github.eylulnc.aura.constants.MOODS
-import com.github.eylulnc.aura.repository.MoodDao
+import com.github.eylulnc.aura.repository.MoodRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,9 +29,9 @@ class AuraMoodWidgetReceiver : GlanceAppWidgetReceiver() {
     companion object {
         fun requestUpdate(context: Context) {
             CoroutineScope(Dispatchers.IO).launch {
-                val dao = getKoin().get<MoodDao>()
+                val repository = getKoin().get<MoodRepository>()
                 val today = LocalDate.now()
-                val entry = dao.getByDate(today.toString())
+                val entry = repository.getToday()
                 val mood = entry?.let { e -> MOODS.find { it.id == e.mood } }
                 val dateLabel = today.format(
                     DateTimeFormatter.ofPattern("EEE, MMM d", Locale.getDefault())

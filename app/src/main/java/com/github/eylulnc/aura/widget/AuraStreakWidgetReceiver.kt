@@ -8,7 +8,7 @@ import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.github.eylulnc.aura.model.MoodEntry
-import com.github.eylulnc.aura.repository.MoodDao
+import com.github.eylulnc.aura.repository.MoodRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -27,8 +27,8 @@ class AuraStreakWidgetReceiver : GlanceAppWidgetReceiver() {
     companion object {
         fun requestUpdate(context: Context) {
             CoroutineScope(Dispatchers.IO).launch {
-                val dao = getKoin().get<MoodDao>()
-                val entries = dao.getAll()
+                val repository = getKoin().get<MoodRepository>()
+                val entries = repository.getAll()
                 val streak = computeStreak(entries)
                 val glanceIds = GlanceAppWidgetManager(context)
                     .getGlanceIds(AuraStreakWidget::class.java)

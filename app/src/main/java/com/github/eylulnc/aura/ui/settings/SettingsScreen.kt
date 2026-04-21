@@ -48,6 +48,7 @@ fun SettingsScreen(
     val reminderMinute by viewModel.reminderMinute.collectAsState()
     val context = LocalContext.current
     var showTimePicker by remember { mutableStateOf(false) }
+    val showSyncConflict by viewModel.showSyncConflictDialog.collectAsState()
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -294,6 +295,27 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(onClick = { viewModel.clearSignInError() }) {
                     Text(stringResource(R.string.settings_delete_cancel))
+                }
+            },
+            containerColor = colors.surface
+        )
+    }
+
+    if (showSyncConflict) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissSyncConflict() },
+            title = { Text("Account Data Found") },
+            text = {
+                Text("Your account already has saved mood data, but you also have unsaved guest data on this device. Which data would you like to keep?\n\nThe other data will be permanently deleted.")
+            },
+            confirmButton = {
+                TextButton(onClick = { viewModel.resolveSyncConflict(keepLocal = false, context) }) {
+                    Text("Keep Account Data")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.resolveSyncConflict(keepLocal = true, context) }) {
+                    Text("Keep Device Data")
                 }
             },
             containerColor = colors.surface
