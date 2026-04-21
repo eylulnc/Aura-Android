@@ -43,6 +43,7 @@ fun LoginScreen(
     val currentUser by viewModel.currentUser.collectAsState()
     val signInError by viewModel.signInError.collectAsState()
     val isSyncing by viewModel.isSyncing.collectAsState()
+    val showSyncConflict by viewModel.showSyncConflictDialog.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.clearSyncing()
@@ -185,6 +186,27 @@ fun LoginScreen(
             confirmButton = {
                 TextButton(onClick = { viewModel.clearSignInError() }) {
                     Text("OK", color = colors.accent)
+                }
+            },
+            containerColor = colors.surface
+        )
+    }
+
+    if (showSyncConflict) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissSyncConflict() },
+            title = { Text("Account Data Found") },
+            text = {
+                Text("Your account already has saved mood data, but you also have unsaved guest data on this device. Which data would you like to keep?\n\nThe other data will be permanently deleted.")
+            },
+            confirmButton = {
+                TextButton(onClick = { viewModel.resolveSyncConflict(keepLocal = false, context) }) {
+                    Text("Keep Account Data")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.resolveSyncConflict(keepLocal = true, context) }) {
+                    Text("Keep Device Data")
                 }
             },
             containerColor = colors.surface

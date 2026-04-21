@@ -4,9 +4,12 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.eylulnc.aura.auth.AuthRepository
+import com.github.eylulnc.aura.constants.SyncState
 import com.github.eylulnc.aura.notification.NotificationScheduler
 import com.github.eylulnc.aura.preferences.AppPreferences
 import com.github.eylulnc.aura.repository.MoodRepository
+import com.github.eylulnc.aura.widget.AuraMoodWidgetReceiver
+import com.github.eylulnc.aura.widget.AuraStreakWidgetReceiver
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -46,6 +49,9 @@ class SettingsViewModel(
     private val _isSyncing = MutableStateFlow(false)
     val isSyncing: StateFlow<Boolean> = _isSyncing.asStateFlow()
 
+    private val _showSyncConflictDialog = MutableStateFlow(false)
+    val showSyncConflictDialog: StateFlow<Boolean> = _showSyncConflictDialog.asStateFlow()
+
     fun setThemeMode(mode: ThemeMode) {
         prefs.setThemeMode(mode)
         _themeMode.value = mode
@@ -57,18 +63,75 @@ class SettingsViewModel(
             try {
                 val result = authRepository.signInWithGoogle(activityContext)
                 if (result.isSuccess) {
-                    repository.syncAllToFirestore()
-                    repository.getEarliestEntryDate()?.let { dateStr ->
-                        prefs.updateFirstLaunchIfEarlier(java.time.LocalDate.parse(dateStr))
+                    when (repository.checkSyncStateOnLogin()) {
+                        SyncState.UPLOAD_LOCAL -> {
+                            repository.pushLocalToRemote()
+                            finishSignInSetup(activityContext, onResult)
+                        }
+
+                        SyncState.DOWNLOAD_REMOTE -> {
+                            repository.pullRemoteToLocal()
+                            finishSignInSetup(activityContext, onResult)
+                        }
+
+                        SyncState.CONFLICT -> {
+                            _isSyncing.value = false
+                            _showSyncConflictDialog.value = true
+                        }
+
+                        SyncState.NO_DATA -> {
+                            finishSignInSetup(activityContext, onResult)
+                        }
                     }
-                    onResult?.invoke(true)
                 } else {
                     _signInError.value = result.exceptionOrNull()?.message
+                    _isSyncing.value = false
                     onResult?.invoke(false)
                 }
+            } catch (e: Exception) {
+                _isSyncing.value = false
+            }
+        }
+    }
+
+    fun resolveSyncConflict(
+        keepLocal: Boolean,
+        activityContext: Context,
+        onResult: ((Boolean) -> Unit)? = null
+    ) {
+        viewModelScope.launch {
+            _isSyncing.value = true
+            _showSyncConflictDialog.value = false
+            try {
+                if (keepLocal) {
+                    repository.pushLocalToRemote()
+                } else {
+                    repository.pullRemoteToLocal()
+                }
+                finishSignInSetup(activityContext, onResult)
             } finally {
                 _isSyncing.value = false
             }
+        }
+    }
+
+    private suspend fun finishSignInSetup(
+        activityContext: Context,
+        onResult: ((Boolean) -> Unit)?
+    ) {
+        repository.getEarliestEntryDate()?.let { dateStr ->
+            prefs.updateFirstLaunchIfEarlier(java.time.LocalDate.parse(dateStr))
+        }
+        AuraMoodWidgetReceiver.requestUpdate(activityContext)
+        AuraStreakWidgetReceiver.requestUpdate(activityContext)
+        onResult?.invoke(true)
+    }
+
+    fun dismissSyncConflict() {
+        viewModelScope.launch {
+            _showSyncConflictDialog.value = false
+            authRepository.signOut()
+            _isSyncing.value = false
         }
     }
 
