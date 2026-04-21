@@ -1,6 +1,7 @@
 package com.github.eylulnc.aura.widget
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import androidx.annotation.RawRes
@@ -38,6 +39,7 @@ import com.github.eylulnc.aura.MainActivity
 import com.github.eylulnc.aura.constants.MOODS
 import com.github.eylulnc.aura.constants.MoodFace
 import androidx.core.graphics.createBitmap
+import androidx.glance.appwidget.action.actionStartActivity
 
 class AuraMoodWidget : GlanceAppWidget() {
 
@@ -55,6 +57,17 @@ class AuraMoodWidget : GlanceAppWidget() {
         val mood = moodId?.let { id -> MOODS.find { it.id == id } }
         val bitmap = mood?.let { renderMoodBitmap(context, it.svgRes, 192) }
 
+        val clickAction = if (bitmap != null && mood != null) {
+            actionStartActivity<MainActivity>()
+        } else {
+            actionStartActivity(
+                Intent(context, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    putExtra(MainActivity.EXTRA_OPEN_MOOD_LOGGER, true)
+                }
+            )
+        }
+
         GlanceTheme {
             Box(
                 modifier = GlanceModifier
@@ -63,7 +76,7 @@ class AuraMoodWidget : GlanceAppWidget() {
                     .background(WidgetColors.background)
                     .cornerRadius(WidgetDimens.cornerRadius)
                     .padding(WidgetDimens.padding)
-                    .clickable(actionStartActivity<MainActivity>()),
+                    .clickable(clickAction),
                 contentAlignment = Alignment.Center
             ) {
                 Column(
@@ -114,7 +127,7 @@ class AuraMoodWidget : GlanceAppWidget() {
     }
 
     companion object {
-        val KEY_MOOD_ID    = intPreferencesKey("widget_mood_id")
+        val KEY_MOOD_ID = intPreferencesKey("widget_mood_id")
         val KEY_DATE_LABEL = stringPreferencesKey("widget_date_label")
     }
 }

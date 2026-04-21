@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +41,7 @@ import com.github.eylulnc.aura.R
 import com.github.eylulnc.aura.constants.getMoodFace
 import com.github.eylulnc.aura.model.MoodEntry
 import com.github.eylulnc.aura.ui.components.MoodSvgImage
+import com.github.eylulnc.aura.ui.events.MoodLoggerEvents
 import com.github.eylulnc.aura.ui.home.components.LogMoodSheet
 import com.github.eylulnc.aura.ui.home.components.MoodStatCard
 import com.github.eylulnc.aura.ui.home.components.MoodTrendCard
@@ -61,6 +63,18 @@ fun TodayScreen(viewModel: TodayViewModel = koinViewModel()) {
     val state by viewModel.uiState.collectAsState()
     val colors = auraColors
     var showSheet by remember { mutableStateOf(false) }
+
+    val openMoodRequest by MoodLoggerEvents.openRequest.collectAsState()
+    var lastHandledOpenRequest by remember { mutableStateOf(0L) }
+    LaunchedEffect(openMoodRequest, state.isLoading) {
+        if (openMoodRequest != 0L &&
+            openMoodRequest != lastHandledOpenRequest &&
+            !state.isLoading
+        ) {
+            lastHandledOpenRequest = openMoodRequest
+            showSheet = true
+        }
+    }
 
     if (state.isLoading) {
         Box(

@@ -9,8 +9,12 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -25,6 +29,7 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import com.github.eylulnc.aura.R
 import com.github.eylulnc.aura.ui.components.FullScreenLoading
+import com.github.eylulnc.aura.ui.events.MoodLoggerEvents
 import com.github.eylulnc.aura.ui.history.HistoryScreen
 import com.github.eylulnc.aura.ui.onboarding.LoginScreen
 import com.github.eylulnc.aura.ui.settings.DataPrivacyScreen
@@ -97,6 +102,19 @@ private fun MainScaffold(
     val colors = auraColors
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+
+    val openMoodRequest by MoodLoggerEvents.openRequest.collectAsState()
+    var lastHandledOpenRequest by remember { mutableStateOf(0L) }
+    LaunchedEffect(openMoodRequest) {
+        if (openMoodRequest != 0L && openMoodRequest != lastHandledOpenRequest) {
+            lastHandledOpenRequest = openMoodRequest
+            navController.navigate(Screen.Today.route) {
+                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                launchSingleTop = true
+                restoreState = true
+            }
+        }
+    }
 
     Scaffold(
         containerColor = colors.background,
