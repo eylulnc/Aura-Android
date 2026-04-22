@@ -9,11 +9,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.tasks.await
 import java.time.Instant
-import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.UUID
-import kotlin.random.Random
 
 class MoodRepository(
     private val dao: MoodDao,
@@ -154,31 +152,6 @@ class MoodRepository(
                 syncedAt = doc.getLong("syncedAt")
             )
             dao.insert(entry)
-        }
-    }
-
-    suspend fun seedDemoData() {
-        val userId = currentUid()
-        val start = LocalDate.of(2025, 11, 1)
-        val end = LocalDate.now().minusDays(1)
-        val weightedMoods = listOf(3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 9, 10, 11, 12, 1, 2, 13)
-        var date = start
-        while (!date.isAfter(end)) {
-            if (Random.nextFloat() > 0.2f) {
-                val dateStr = date.toString()
-                if (dao.getByDate(userId, dateStr) == null) {
-                    dao.insert(
-                        MoodEntry(
-                            id = UUID.randomUUID().toString(),
-                            userId = userId,
-                            date = dateStr,
-                            timestamp = date.atStartOfDay(ZoneId.systemDefault()).toEpochSecond() * 1000,
-                            mood = weightedMoods.random()
-                        )
-                    )
-                }
-            }
-            date = date.plusDays(1)
         }
     }
 

@@ -71,6 +71,13 @@ fun DataPrivacyScreen(
         ) {
             if (currentUser != null) {
                 DestructiveCard(
+                    title = stringResource(R.string.data_privacy_delete_data_title),
+                    description = stringResource(R.string.data_privacy_delete_data_signed_in_description),
+                    buttonLabel = stringResource(R.string.data_privacy_delete_data_button),
+                    colors = colors,
+                    onClick = { showDeleteDataDialog = true }
+                )
+                DestructiveCard(
                     title = stringResource(R.string.data_privacy_delete_account_title),
                     description = stringResource(R.string.data_privacy_delete_account_description),
                     buttonLabel = stringResource(R.string.data_privacy_delete_account_button),
@@ -107,11 +114,20 @@ fun DataPrivacyScreen(
         AlertDialog(
             onDismissRequest = { showDeleteDataDialog = false },
             title = { Text(stringResource(R.string.data_privacy_delete_data_confirm_title)) },
-            text = { Text(stringResource(R.string.data_privacy_delete_data_confirm_body)) },
+            text = {
+                Text(
+                    stringResource(
+                        if (currentUser != null) R.string.data_privacy_delete_data_signed_in_confirm_body
+                        else R.string.data_privacy_delete_data_confirm_body
+                    )
+                )
+            },
             confirmButton = {
                 TextButton(onClick = {
                     showDeleteDataDialog = false
-                    viewModel.deleteAllData {}
+                    viewModel.deleteAllData(context) {
+                        Toast.makeText(context, context.getString(R.string.data_privacy_delete_data_success), Toast.LENGTH_SHORT).show()
+                    }
                 }) {
                     Text(
                         stringResource(R.string.data_privacy_delete_data_confirm_action),
@@ -137,7 +153,7 @@ fun DataPrivacyScreen(
                 TextButton(onClick = {
                     showDeleteAccountDialog = false
                     viewModel.deleteAccount(context) {
-                        Toast.makeText(context, "Account deleted successfully", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.data_privacy_delete_account_success), Toast.LENGTH_SHORT).show()
                         onAccountDeleted()
                     }
                 }) {

@@ -64,6 +64,8 @@
     <string name="data_privacy_delete_data_button">Delete all data</string>
     <string name="data_privacy_delete_data_confirm_title">Delete all data?</string>
     <string name="data_privacy_delete_data_confirm_body">This will permanently delete all your mood entries from this device. This cannot be undone.</string>
+    <string name="data_privacy_delete_data_signed_in_description">Permanently removes all mood entries from this device and the cloud. Your account stays active.</string>
+    <string name="data_privacy_delete_data_signed_in_confirm_body">This will permanently delete all your mood entries, both locally and from the cloud. Your account will remain active. This cannot be undone.</string>
     <string name="data_privacy_delete_data_confirm_action">Delete</string>
     <string name="data_privacy_delete_account_title">Delete account</string>
     <string name="data_privacy_delete_account_description">Permanently deletes your account and all mood entries from every device. This cannot be undone.</string>
@@ -71,6 +73,8 @@
     <string name="data_privacy_delete_account_confirm_title">Delete account?</string>
     <string name="data_privacy_delete_account_confirm_body">This will permanently delete your account and all your mood entries, both locally and from the cloud. This cannot be undone.</string>
     <string name="data_privacy_delete_account_confirm_action">Delete account</string>
+    <string name="data_privacy_delete_account_success">Account deleted successfully</string>
+    <string name="data_privacy_delete_data_success">All data deleted successfully</string>
     <string name="settings_version">Version %1$s</string>
     <string name="settings_developer">by Eylül Naz Can</string>
 
