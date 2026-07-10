@@ -1,7 +1,15 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.google.services)
+}
+
+val keyProperties = Properties().apply {
+    val file = rootProject.file("key.properties")
+    if (file.exists()) load(file.inputStream())
 }
 
 android {
@@ -14,17 +22,19 @@ android {
 
     defaultConfig {
         applicationId = "com.github.eylulnc.aura"
-        minSdk = 30
+        minSdk = 31
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${keyProperties["GOOGLE_WEB_CLIENT_ID"]}\"")
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -37,6 +47,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -49,6 +60,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.navigation.compose)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.room.runtime)
@@ -58,6 +70,15 @@ dependencies {
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.androidx.navigation)
     implementation(libs.androidsvg)
+    implementation(libs.coil.compose)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play)
+    implementation(libs.googleid)
+    implementation(libs.glance.appwidget)
+    implementation(libs.glance.material3)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

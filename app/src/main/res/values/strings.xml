@@ -1,3 +1,97 @@
 <resources>
     <string name="app_name">Aura</string>
+
+    <!-- Today screen -->
+    <string name="today_prompt_empty">How are you feeling?</string>
+    <string name="today_tap_to_log">Tap to log today\'s mood</string>
+    <string name="today_prompt_logged">You\'re feeling</string>
+    <string name="today_note_placeholder">Add a note… (optional)</string>
+    <string name="today_note_label">Your note</string>
+    <string name="today_action_log">Log mood</string>
+    <string name="today_action_update">Update</string>
+    <string name="today_action_edit">Edit</string>
+    <string name="today_action_cancel">Cancel</string>
+
+    <!-- Today dashboard stats -->
+    <string name="today_stat_streak">Streak</string>
+    <string name="today_stat_streak_unit">days</string>
+    <string name="today_stat_streak_unit_single">day</string>
+    <string name="today_stat_days_logged">This month</string>
+    <string name="today_stat_days_unit">days logged</string>
+    <string name="today_stat_top_mood">Top mood</string>
+    <string name="today_stat_positive">Positive</string>
+    <string name="today_stat_positive_unit">this week</string>
+    <string name="today_trend_title">This week</string>
+    <string name="today_trend_zone_positive">Positive</string>
+    <string name="today_trend_zone_neutral">Neutral</string>
+    <string name="today_trend_zone_negative">Negative</string>
+    <string name="today_top_moods_title">Top moods this month</string>
+
+    <!-- Navigation tabs -->
+    <string name="tab_today">Home</string>
+    <string name="tab_history">History</string>
+    <string name="tab_settings">Settings</string>
+
+    <!-- History screen -->
+    <string name="history_no_entries">No entries this month</string>
+    <string name="history_action_delete">Delete entry</string>
+
+    <!-- Login -->
+    <string name="login_subtitle">mood journal</string>
+    <string name="login_description">Track how you feel,\none day at a time.</string>
+    <string name="login_sign_in">Sign in with Google</string>
+    <string name="login_guest">Continue as Guest</string>
+
+    <!-- Settings / Account -->
+    <string name="settings_section_account">Account</string>
+    <string name="settings_sign_in">Sign in with Google</string>
+    <string name="settings_sign_out">Sign out</string>
+    <string name="settings_sign_in_error_title">Sign in failed</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_section_data_privacy">Data &amp; Privacy</string>
+    <string name="loading_working">Working on it…</string>
+    <string name="settings_delete_cancel">Cancel</string>
+
+    <!-- Data &amp; Privacy screen -->
+    <string name="data_privacy_policy_link">Privacy Policy</string>
+    <string name="data_privacy_delete_data_title">Delete all data</string>
+    <string name="data_privacy_delete_data_description">Removes all mood entries from this device. Your account stays active and you can sign back in at any time.</string>
+    <string name="data_privacy_delete_data_button">Delete all data</string>
+    <string name="data_privacy_delete_data_confirm_title">Delete all data?</string>
+    <string name="data_privacy_delete_data_confirm_body">This will permanently delete all your mood entries from this device. This cannot be undone.</string>
+    <string name="data_privacy_delete_data_signed_in_description">Permanently removes all mood entries from this device and the cloud. Your account stays active.</string>
+    <string name="data_privacy_delete_data_signed_in_confirm_body">This will permanently delete all your mood entries, both locally and from the cloud. Your account will remain active. This cannot be undone.</string>
+    <string name="data_privacy_delete_data_confirm_action">Delete</string>
+    <string name="data_privacy_delete_account_title">Delete account</string>
+    <string name="data_privacy_delete_account_description">Permanently deletes your account and all mood entries from every device. This cannot be undone.</string>
+    <string name="data_privacy_delete_account_button">Delete account</string>
+    <string name="data_privacy_delete_account_confirm_title">Delete account?</string>
+    <string name="data_privacy_delete_account_confirm_body">This will permanently delete your account and all your mood entries, both locally and from the cloud. This cannot be undone.</string>
+    <string name="data_privacy_delete_account_confirm_action">Delete account</string>
+    <string name="data_privacy_delete_account_success">Account deleted successfully</string>
+    <string name="data_privacy_delete_data_success">All data deleted successfully</string>
+    <string name="settings_version">Version %1$s</string>
+    <string name="settings_developer">by Eylül Naz Can</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_name">Daily Reminder</string>
+    <string name="notification_channel_description">Reminds you to log your mood each day</string>
+    <string name="notification_title">How are you feeling today?</string>
+    <string name="notification_body">Tap to log your mood.</string>
+    <string name="settings_section_reminders">Reminders</string>
+    <string name="settings_reminders_toggle">Daily reminder</string>
+    <string name="settings_reminders_time">Reminder time</string>
+    <string name="notification_time_confirm">OK</string>
+
+    <!-- Widget -->
+    <string name="widget_description">Shows today\'s mood at a glance</string>
+    <string name="widget_streak_description">Shows your current mood streak</string>
+    <string name="widget_log_mood">Log mood</string>
+    <string name="widget_log_today">Log today</string>
 </resources>
