@@ -5,14 +5,18 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.WindowInsets
@@ -33,6 +37,7 @@ fun DataPrivacyScreen(
     var showDeleteDataDialog by remember { mutableStateOf(false) }
     var showDeleteAccountDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
 
     Scaffold(
         containerColor = colors.background,
@@ -69,6 +74,29 @@ fun DataPrivacyScreen(
                 .padding(top = Spacing.m),
             verticalArrangement = Arrangement.spacedBy(Spacing.xl)
         ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(Spacing.radiusCard))
+                    .background(colors.surface)
+                    .clickable { uriHandler.openUri("https://eylulnc.github.io/Aura-Android/privacy-policy") }
+                    .padding(Spacing.l),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.data_privacy_policy_link),
+                    fontSize = FontSize.m,
+                    color = colors.textPrimary
+                )
+                Icon(
+                    imageVector = Icons.Filled.OpenInNew,
+                    contentDescription = null,
+                    tint = colors.textSecondary,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+
             if (currentUser != null) {
                 DestructiveCard(
                     title = stringResource(R.string.data_privacy_delete_data_title),
