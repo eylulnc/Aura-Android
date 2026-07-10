@@ -59,6 +59,7 @@
     <string name="settings_delete_cancel">Cancel</string>
 
     <!-- Data &amp; Privacy screen -->
+    <string name="data_privacy_policy_link">Privacy Policy</string>
     <string name="data_privacy_delete_data_title">Delete all data</string>
     <string name="data_privacy_delete_data_description">Removes all mood entries from this device. Your account stays active and you can sign back in at any time.</string>
     <string name="data_privacy_delete_data_button">Delete all data</string>
