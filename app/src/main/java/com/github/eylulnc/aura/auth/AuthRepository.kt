@@ -2,8 +2,8 @@ package com.github.eylulnc.aura.auth
 
 import android.content.Context
 import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
-import androidx.credentials.exceptions.GetCredentialException
 import com.github.eylulnc.aura.BuildConfig
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -39,12 +39,18 @@ class AuthRepository {
                 .addCredentialOption(googleIdOption)
                 .build()
             val result = credentialManager.getCredential(activityContext, request)
-            val googleIdToken = GoogleIdTokenCredential.createFrom(result.credential.data).idToken
+            val credential = result.credential
+            if (credential !is CustomCredential ||
+                credential.type != GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+            ) {
+                return Result.failure(Exception("Unexpected credential type: ${credential.type}"))
+            }
+            val googleIdToken = GoogleIdTokenCredential.createFrom(credential.data).idToken
             val firebaseCredential = GoogleAuthProvider.getCredential(googleIdToken, null)
             val user = auth.signInWithCredential(firebaseCredential).await().user
                 ?: return Result.failure(Exception("Sign in failed"))
             Result.success(user)
-        } catch (e: GetCredentialException) {
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }
