@@ -90,6 +90,8 @@ class SettingsViewModel(
                 }
             } catch (e: Exception) {
                 _isSyncing.value = false
+                _signInError.value = e.message
+                onResult?.invoke(false)
             }
         }
     }
