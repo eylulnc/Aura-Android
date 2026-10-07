@@ -5,6 +5,10 @@ over time, and understand your emotional trends at a glance.
 
 <br>
 
+### Check the apps 📲 
+- [Google Play](https://play.google.com/store/apps/details?id=com.github.eylulnc.aura)
+- [App Store](https://apps.apple.com/app/aura-mood-tracker/id6789640136)·
+
 ## Screenshots
 
 ### Light Mode
@@ -123,7 +127,7 @@ over time, and understand your emotional trends at a glance.
 
 - [x] Daily reminder notification — prompt to log mood at a chosen time
 - [x] Home screen widget — see today's mood or streak without opening the app
-- [ ] iOS app — native SwiftUI, same Firebase project
+- [x] iOS app — native SwiftUI, same Firebase project
 - [ ] Extended trends — monthly and yearly mood views
 
 <br>
